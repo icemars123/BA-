@@ -78,7 +78,6 @@ function selectPrice(world, prices)
       }
     }
 
-
     if (__.isNull(p.clientid))
     {
       if (!__.isNull(qty)) 
