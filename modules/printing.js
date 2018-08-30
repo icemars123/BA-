@@ -1301,7 +1301,7 @@ function PrintOrders(world)
                       (
                         function(result)
                         {
-                          details = result;
+                          // details = result;
                           return doGetOrderTemplate(tx, world.cn.custid, header, world.custconfig.orderprinttemplateid);
                         }
                       ).then
