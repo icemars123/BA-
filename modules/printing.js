@@ -917,33 +917,32 @@ function doGetQuoteTemplate(tx, custid, header)
 
 function doGenOrder(tx, custid, header, details, templatename, uname)
 {
+  var Excel = require('exceljs');
+  var workbook = new Excel..Workbook();
   var promise = new global.rsvp.Promise
   (
     function(resolve, reject)
     {
-      fs.readFile
+      workbook.xlsx.readFile(templatename)
+      .then
       (
-        templatename,
-        function(err, data)
+        function (err, data) 
         {
-          if (!err)
+          if (!err) 
           {
             var sheetno = 1;
-            var template = new global.xlwriter(data);
-            var blob = null;
             var products = [];
             var totalinc = __.toBigNum(0.0);
             var totalex = __.toBigNum(0.0);
             var totalgst = __.toBigNum(0.0);
             var foldername = global.path.join(__dirname, global.config.folders.orders + custid);
-            var no = __.isNull(header.orderno) ? header.invoiceno : header.orderno; 
+            var no = __.isNull(header.orderno) ? header.invoiceno : header.orderno;
             var filename = global.config.defaults.defaultPrefixOrderFilename + no + global.config.defaults.defaultXLExtension;
             var lineno = 1;
 
             details.forEach
-            (
-              function(r)
-              {
+              (
+              function (r) {
                 var p = __.toBigNum(r.price);
                 var g = __.toBigNum(r.gst);
                 var q = __.toBigNum(r.qty);
@@ -964,41 +963,12 @@ function doGenOrder(tx, custid, header, details, templatename, uname)
                 var subex = t1.plus(subf).minus(subd);
                 var subinc = subgst.plus(subex);
 
-                /*
-                console.log( __.formatnumber(p, 4));
-                console.log( __.formatnumber(q, 4));
-                console.log( __.formatnumber(qu, 4));
-
-                console.log( __.formatnumber(subgst, 4));
-                console.log( __.formatnumber(subex, 4));
-                console.log( __.formatnumber(subinc, 4));
-
-                console.log( __.formatnumber(subgst, 2));
-                console.log( __.formatnumber(subex, 2));
-                console.log( __.formatnumber(subinc, 2));
-                */
-
                 totalgst = totalgst.plus(subgst);
                 totalex = totalex.plus(subex);
                 totalinc = totalinc.plus(subinc);
 
-                /*
                 products.push
-                (
-                  {
-                    lineno: lineno++,
-                    code: d.productcode,
-                    name: d.productname,
-                    unit: '',
-                    gst: __.niceformatnumber(d.gst, 2),
-                    qty: __.niceformatnumber(d.qty, 2),
-                    price: __.niceformatnumber(d.price, 2),
-                    subtotal: __.niceformatnumber(subex, 2)
-                  }
-                );
-                */
-                products.push
-                (
+                  (
                   {
                     lineno: lineno++,
                     code: r.productcode,
@@ -1011,9 +981,9 @@ function doGenOrder(tx, custid, header, details, templatename, uname)
                     subtotal: __.niceformatnumber(subex, 2),
                     subtotalgst: __.niceformatnumber(subgst, 2)
                   }
-                );
+                  );
               }
-            );
+              );
 
             // console.log(products);
             var values =
@@ -1066,26 +1036,27 @@ function doGenOrder(tx, custid, header, details, templatename, uname)
               product: products
             };
 
-            template.substitute(sheetno, values);
-            blob = template.generate();
 
+            // template.substitute(sheetno, values);
+            // blob = template.generate();
+            // template.substitute(sheetno, values);
+            // blob = template.generate();
+            
             ensureFolderExists
             (
               foldername,
               0775,
-              function(err)
+              function (err) 
               {
-                if (!err)
+                if(!err)
                 {
-                  fs.writeFile
+                  workbook.xlsx.writeFile(foldername + '/' + filename)
+                  .then
                   (
-                    foldername + '/' + filename,
-                    blob,
-                    'binary',
-                    function(err)
+                    function (err) 
                     {
                       if (!err)
-                        resolve({orderno: header.orderno, invoiceno: header.invoiceno, basename: filename, fullpath: foldername + '/' + filename});
+                        resolve({ orderno: header.orderno, invoiceno: header.invoiceno, basename: filename, fullpath: foldername + '/' + filename });
                       else
                         reject(err);
                     }
@@ -1094,12 +1065,198 @@ function doGenOrder(tx, custid, header, details, templatename, uname)
                 else
                   reject(err);
               }
-            );
-          }
-          else
+            );        
+          } 
+          else 
             reject(err);
+
         }
       );
+
+      // ******
+      // fs.readFile
+      // (
+      //   templatename,
+      //   function(err, data)
+      //   {
+      //     if (!err)
+      //     {
+      //       var sheetno = 1;
+      //       var template = new global.xlwriter(data);
+      //       var blob = null;
+      //       var products = [];
+      //       var totalinc = __.toBigNum(0.0);
+      //       var totalex = __.toBigNum(0.0);
+      //       var totalgst = __.toBigNum(0.0);
+      //       var foldername = global.path.join(__dirname, global.config.folders.orders + custid);
+      //       var no = __.isNull(header.orderno) ? header.invoiceno : header.orderno; 
+      //       var filename = global.config.defaults.defaultPrefixOrderFilename + no + global.config.defaults.defaultXLExtension;
+      //       var lineno = 1;
+
+      //       details.forEach
+      //       (
+      //         function(r)
+      //         {
+      //           var p = __.toBigNum(r.price);
+      //           var g = __.toBigNum(r.gst);
+      //           var q = __.toBigNum(r.qty);
+      //           var d = __.toBigNum(r.discount);
+      //           var f = __.toBigNum(r.expressfee);
+      //           var t1 = p.times(q);
+      //           var t2 = g.times(q);
+
+      //           // Discount and express fee...
+      //           // +GST
+      //           var subd = t1.times(d).div(100.0);
+      //           var subf = t1.times(f).div(100.0);
+      //           // -GST
+      //           var subgstd = t2.times(d).div(100.0);
+      //           var subgstf = t2.times(f).div(100.0);
+
+      //           var subgst = t2.plus(subgstf).minus(subgstd);
+      //           var subex = t1.plus(subf).minus(subd);
+      //           var subinc = subgst.plus(subex);
+
+      //           /*
+      //           console.log( __.formatnumber(p, 4));
+      //           console.log( __.formatnumber(q, 4));
+      //           console.log( __.formatnumber(qu, 4));
+
+      //           console.log( __.formatnumber(subgst, 4));
+      //           console.log( __.formatnumber(subex, 4));
+      //           console.log( __.formatnumber(subinc, 4));
+
+      //           console.log( __.formatnumber(subgst, 2));
+      //           console.log( __.formatnumber(subex, 2));
+      //           console.log( __.formatnumber(subinc, 2));
+      //           */
+
+      //           totalgst = totalgst.plus(subgst);
+      //           totalex = totalex.plus(subex);
+      //           totalinc = totalinc.plus(subinc);
+
+      //           /*
+      //           products.push
+      //           (
+      //             {
+      //               lineno: lineno++,
+      //               code: d.productcode,
+      //               name: d.productname,
+      //               unit: '',
+      //               gst: __.niceformatnumber(d.gst, 2),
+      //               qty: __.niceformatnumber(d.qty, 2),
+      //               price: __.niceformatnumber(d.price, 2),
+      //               subtotal: __.niceformatnumber(subex, 2)
+      //             }
+      //           );
+      //           */
+      //           products.push
+      //           (
+      //             {
+      //               lineno: lineno++,
+      //               code: r.productcode,
+      //               name: r.productname,
+      //               price: __.niceformatnumber(r.price, 2),
+      //               gst: __.niceformatnumber(r.gst, 2),
+      //               qty: __.niceformatnumber(r.qty, 2),
+      //               discount: __.niceformatnumber(r.discount, 2),
+      //               expressfee: __.niceformatnumber(r.expressfee, 2),
+      //               subtotal: __.niceformatnumber(subex, 2),
+      //               subtotalgst: __.niceformatnumber(subgst, 2)
+      //             }
+      //           );
+      //         }
+      //       );
+
+      //       // console.log(products);
+      //       var values =
+      //       {
+      //         orderinvoiceno: __.sanitiseAsString(header.invoiceno),
+      //         orderorderno: __.sanitiseAsString(header.orderno),
+      //         custpo: __.sanitiseAsString(header.pono),
+      //         orderinvoicedate: global.moment(__.sanitiseAsString(header.invoicedate)).format('LL'),
+      //         orderstartdate: global.moment(__.sanitiseAsString(header.datecreated)).format('LL'),
+
+      //         custname: __.isBlank(header.ordername) ? __.sanitiseAsString(header.clientname) : __.sanitiseAsString(header.ordername),
+      //         custvendorcode: __.sanitiseAsString(header.clientcode),
+
+      //         custcontact1: __.sanitiseAsString(header.clientcontact1),
+      //         custcontact2: __.sanitiseAsString(header.clientcontact2),
+
+      //         custshipnotes: '',
+
+      //         custaddress1: __.sanitiseAsString(header.invoicetoaddress1),
+      //         custaddress2: __.sanitiseAsString(header.invoicetoaddress2),
+      //         custcity: __.sanitiseAsString(header.invoicetocity),
+      //         custpostcode: __.sanitiseAsString(header.invoicetopostcode),
+      //         custstate: __.sanitiseAsString(header.invoicetostate),
+      //         custcountry: __.sanitiseAsString(header.invoicetocountry),
+
+      //         custaddress1: __.sanitiseAsString(header.shiptoaddress1),
+      //         custaddress2: __.sanitiseAsString(header.shiptoaddress2),
+      //         custcity: __.sanitiseAsString(header.shiptocity),
+      //         custpostcode: __.sanitiseAsString(header.shiptopostcode),
+      //         custstate: __.sanitiseAsString(header.shiptostate),
+      //         custcountry: __.sanitiseAsString(header.shiptocountry),
+
+      //         custacn: __.sanitiseAsString(header.clientacn),
+      //         custabn: __.sanitiseAsString(header.clientabn),
+      //         custhscode: __.sanitiseAsString(header.clienthscode),
+      //         custcustcode1: __.sanitiseAsString(header.clientcustcode1),
+      //         custcustcode2: __.sanitiseAsString(header.clientcustcode2),
+
+      //         prepearedby: __.sanitiseAsString(uname),
+      //         orderrevno: header.activeversion,
+      //         orderrevdate: __.sanitiseAsString(header.datemodified),
+
+      //         ordertotal: __.niceformatnumber(totalex, 2),
+      //         orderdeliveryfee: '',
+      //         ordergstamount: __.niceformatnumber(totalgst, 2),
+      //         orderincgst: __.niceformatnumber(totalinc, 2),
+      //         orderapplied: '',
+      //         ordergrandtotal: __.niceformatnumber(totalinc, 2),
+
+      //         product: products
+      //       };
+
+            
+      //       template.substitute(sheetno, values);
+      //       blob = template.generate();
+      //       template.substitute(sheetno, values);
+      //       blob = template.generate();
+
+      //       ensureFolderExists
+      //       (
+      //         foldername,
+      //         0775,
+      //         function(err)
+      //         {
+      //           if (!err)
+      //           {
+      //             fs.writeFile
+      //             (
+      //               foldername + '/' + filename,
+      //               blob,
+      //               'binary',
+      //               function(err)
+      //               {
+      //                 if (!err)
+      //                   resolve({orderno: header.orderno, invoiceno: header.invoiceno, basename: filename, fullpath: foldername + '/' + filename});
+      //                 else
+      //                   reject(err);
+      //               }
+      //             );
+      //           }
+      //           else
+      //             reject(err);
+      //         }
+      //       );
+      //     }
+      //     else
+      //       reject(err);
+      //   }
+      // );
+      //***** */
     }
   );
   return promise;
