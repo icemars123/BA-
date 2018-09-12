@@ -9,6 +9,8 @@ function doDlgUserPermissions(user)
     }
   ];
 
+  
+
   function doSave()
   {
     var rows = $('#divPermissionsPG').propertygrid('getRows');
@@ -45,6 +47,10 @@ function doDlgUserPermissions(user)
     };
 
     doServerDataMessage('saveuserpermissions', {useruuid: user.uuid, permissions: permissions}, {type: 'refresh'});
+  }
+
+  function doChooseSale() {
+    
   }
 
   function doMakeRowProperty(name, value, group)
@@ -97,6 +103,7 @@ function doDlgUserPermissions(user)
 
               cache_userpermissions.push(doMakeRowProperty('Can View', user.canvieworders, 'Orders'));
               cache_userpermissions.push(doMakeRowProperty('Can Create', user.cancreateorders, 'Orders'));
+              
               cache_userpermissions.push(doMakeRowProperty('Can View', user.canviewinvoices, 'Invoices'));
               cache_userpermissions.push(doMakeRowProperty('Can Create', user.cancreateinvoices, 'Invoices'));
 

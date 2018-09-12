@@ -32,6 +32,7 @@ function doWidgetListeners()
 
   doUsersTabWidgets();
   doStatusAlertsTabWidgets();
+  doPermissionTemplatesTabWidgets();
   doProductTemplatesTabWidgets();
   doTemplatesTabWidgets();
   doEmailsTabWidgets();

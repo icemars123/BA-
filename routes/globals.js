@@ -346,6 +346,7 @@ var cache_locations = [];
 var cache_productcategories = [];
 var cache_porders = [];
 var cache_producttemplates = [];
+var cashe_permissiontemplates = [];
 var cache_products = [];
 var cache_users = [];
 var cache_statusalerts = [];
@@ -1593,6 +1594,7 @@ function doRefreshAll()
   doServerMessage('listpayrollemployees', {type: 'refresh'});
   doServerMessage('listemployees', {type: 'refresh'});
   doServerMessage('listusers', {type: 'refresh'});
+  doServerMessage('listpermissiontemplates', { type: 'refresh' });
   doServerMessage('listproductcategories', {type: 'refresh'});
   doServerMessage('listproducttemplates', {type: 'refresh'});
   doServerMessage('listproducts', {type: 'refresh'});

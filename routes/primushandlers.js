@@ -256,6 +256,7 @@ function doPrimus()
             $('#inventorytabs').tabs('close', 'Builds');
 
             $('#maintenancetabs').tabs('close', 'Status Alerts');
+            $('#maintenancetabs').tabs('close', 'Permission Templates');
             $('#maintenancetabs').tabs('close', 'Product Templates');
             $('#maintenancetabs').tabs('close', 'Print Templates');
             $('#maintenancetabs').tabs('close', 'Emails');
@@ -387,6 +388,7 @@ function doPrimus()
               // Templates
               if (!myperms.canviewtemplates)
               {
+                $('#maintenancetabs').tabs('close', 'Permission Templates');
                 $('#maintenancetabs').tabs('close', 'Product Templates');
                 $('#maintenancetabs').tabs('close', 'Print Templates');
               }
@@ -430,6 +432,7 @@ function doPrimus()
               else
               {
                 $('#maintenancetabs').tabs('close', 'Status Alerts');
+                $('#maintenancetabs').tabs('close', 'Permission Templates');
                 $('#maintenancetabs').tabs('close', 'Product Templates');
                 $('#maintenancetabs').tabs('close', 'Print Templates');
 

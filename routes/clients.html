@@ -260,6 +260,16 @@
     <div onclick="doClientAttachmentsDownload()" data-options="iconCls: 'icon-download'">Download</div>
   </div>
   -->
+  <div id="divPermissionTemplatesMenuPopup" class="easyui-menu" style="width: 120px; display: none;">
+    <div onclick="doTemplatesNew()" data-options="iconCls: 'icon-add'">Add</div>
+    <div onclick="doTemplatesEdit()" data-options="iconCls: 'icon-edit'">Edit</div>
+    <div onclick="doTemplatesRemove()" data-options="iconCls: 'icon-remove'">Remove</div>
+    <div onclick="doTemplatesDuplicate()" data-options="iconCls: 'icon-duplicate'">Duplicate</div>
+    <div onclick="doTemplatesDetails()" data-options="iconCls: 'icon-large-smartart'">Details</div>
+    <div class="menu-sep"></div>
+    <div onclick="doTemplatesRemoveParent()" data-options="iconCls: 'icon-hierarchy'">No Parent</div>
+  </div>
+
 
   <div id="divTemplatesMenuPopup" class="easyui-menu" style="width: 120px; display: none;">
     <div onclick="doTemplatesNew()" data-options="iconCls: 'icon-add'">Add</div>

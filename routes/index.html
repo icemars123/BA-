@@ -160,6 +160,7 @@
   <script type="text/javascript" src="tab-products.js"></script>
   <script type="text/javascript" src="tab-product-categories.js"></script>
   <script type="text/javascript" src="tab-build-templates.js"></script>
+  <script type="text/javascript" src="tab-permission-templates.js"></script>
   <script type="text/javascript" src="tab-product-templates.js"></script>
   <script type="text/javascript" src="tab-timeclock.js"></script>
   <script type="text/javascript" src="tab-taxcodes.js"></script>
@@ -645,6 +646,16 @@
     <div onclick="doContextMenu('buildtemplatedetailspopup', 'viewproduct')" data-options="iconCls: 'icon-box'">View Product</div>
   </div>
 
+  <div id="divPermissionTemplatesMenuPopup" class="easyui-menu" style="width: 120px; display: none;">
+    <div onclick="doContextMenu('permissiontemplatespopup', 'new')" data-options="iconCls: 'icon-add'">Add</div>
+    <div onclick="doContextMenu('permissiontemplatespopup', 'edit')" data-options="iconCls: 'icon-edit'">Edit</div>
+    <div onclick="doContextMenu('permissiontemplatespopup', 'remove')" data-options="iconCls: 'icon-remove'">Remove</div>
+    <div onclick="doContextMenu('permissiontemplatespopup', 'duplicate')" data-options="iconCls: 'icon-duplicate'">Duplicate</div>
+    <div onclick="doContextMenu('permissiontemplatespopup', 'details')" data-options="iconCls: 'icon-large-smartart'">Details</div>
+    <div class="menu-sep"></div>
+    <div onclick="doContextMenu('permissiontemplatespopup', 'removeparent')" data-options="iconCls: 'icon-hierarchy'">No Parent</div>
+  </div>
+
   <div id="divTemplatesMenuPopup" class="easyui-menu" style="width: 120px; display: none;">
     <div onclick="doContextMenu('producttemplatespopup', 'new')" data-options="iconCls: 'icon-add'">Add</div>
     <div onclick="doContextMenu('producttemplatespopup', 'edit')" data-options="iconCls: 'icon-edit'">Edit</div>
@@ -1123,7 +1134,7 @@
     <div id="divInventoryBuildsG" style="width: 100%; height: 500px;"></div>
   </div>
 
-  <div id="dlgUserPermissions" class="easyui-dialog" title="User Permissions" style="width: 220px; height: 600px;" data-options="resizable: false, modal: true, closable: false, closed: true">
+  <div id="dlgUserPermissions" class="easyui-dialog" title="User Permissions" style="width: 220px; height: 600px;" data-options="resizable: true, modal: true, closable: true, closed: true">
     <div id="divPermissionsPG" style="width: 100%; height: 500px;"></div>
   </div>
 
@@ -3520,6 +3531,20 @@
     </div>
   </div>
 
+  <div id="tbPermissionTemplates" style="height: auto; display: none">
+    <div style="margin-bottom: 5px">
+      <a href="javascript:void(0)" onClick="doContextMenu('permissiontemplatespopup', 'newroot')" class="easyui-linkbutton" iconCls="icon-add">New</a>
+      <a href="javascript:void(0)" onClick="doContextMenu('permissiontemplatespopup', 'clear')" class="easyui-linkbutton" iconCls="icon-clear">Clear</a>
+      <a href="javascript:void(0)" onClick="doContextMenu('permissiontemplatespopup', 'edit')" class="easyui-linkbutton" iconCls="icon-edit">Edit</a>
+      <a href="javascript:void(0)" onClick="doContextMenu('permissiontemplatespopup', 'cancel')" class="easyui-linkbutton" iconCls="icon-cancel">Cancel</a>
+      <a href="javascript:void(0)" onClick="doContextMenu('permissiontemplatespopup', 'save')" class="easyui-linkbutton" iconCls="icon-save">Save</a>
+      <a href="javascript:void(0)" onClick="doContextMenu('permissiontemplatespopup', 'remove')" class="easyui-linkbutton" iconCls="icon-remove">Remove</a>
+      <a href="javascript:void(0)" onClick="doContextMenu('permissiontemplatespopup', 'duplicate')" class="easyui-linkbutton" iconCls="icon-duplicate">Duplicate</a>
+      <a href="javascript:void(0)" onClick="doContextMenu('permissiontemplatespopup', 'details')" class="easyui-linkbutton" iconCls="icon-objects">Details</a>
+      <input class="easyui-searchbox" data-options="prompt: 'Code or name to search for', searcher: doPermissionTemplatesTabSearch" style="width: 300px" />
+    </div>
+  </div>
+
   <div id="tbTemplates" style="height: auto; display: none">
     <div style="margin-bottom: 5px">
       <a href="javascript:void(0)" onClick="doContextMenu('producttemplatespopup', 'newroot')" class="easyui-linkbutton" iconCls="icon-add">New</a>
@@ -3530,7 +3555,8 @@
       <a href="javascript:void(0)" onClick="doContextMenu('producttemplatespopup', 'remove')" class="easyui-linkbutton" iconCls="icon-remove">Remove</a>
       <a href="javascript:void(0)" onClick="doContextMenu('producttemplatespopup', 'duplicate')" class="easyui-linkbutton" iconCls="icon-duplicate">Duplicate</a>
       <a href="javascript:void(0)" onClick="doContextMenu('producttemplatespopup', 'details')" class="easyui-linkbutton" iconCls="icon-objects">Details</a>
-      <input class="easyui-searchbox" data-options="prompt: 'Code or name to search for', searcher: doTemplatesTabSearch" style="width: 300px" />
+      <input class="easyui-searchbox" data-options="prompt: 'Code or name to search for', searcher: doTemplatesTabSearch" style="width: 300px"
+      />
     </div>
   </div>
 
@@ -4032,6 +4058,10 @@
 
               <div title="Status Alerts" data-options="iconCls: 'icon-alarm'">
                 <div id="divStatusAlertsG" data-options="fit: true"></div>
+              </div>
+
+              <div title="Permission Templates" data-options="iconCls: 'icon-lock'">
+                <table id="divPermissionTemplatesTG" data-options="fit: true"></table>
               </div>
 
               <div title="Product Templates" data-options="iconCls: 'icon-template'">
