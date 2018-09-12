@@ -918,27 +918,108 @@ function doGetQuoteTemplate(tx, custid, header)
 function doGenOrder(tx, custid, header, details, templatename, uname)
 {
   var Excel = require('exceljs');
-  var workbook = new Excel..Workbook();
+  
+  // var sheets = []
+  // var chunks = [];
+  // var chunkSize = 3;
+  // details.forEach
+  // (
+  //   (item) => {
+  //     if (!chunks.length || chunks[chunks.length - 1].length == chunkSize)
+  //       chunks.push([]);
+  //     chunks[chunks.length - 1].push(item);
+  //   }
+  // );
   var promise = new global.rsvp.Promise
   (
     function(resolve, reject)
     {
+      var workbook = new Excel.Workbook();
+
+      
+
       workbook.xlsx.readFile(templatename)
       .then
       (
-        function (err, data) 
+        function () 
         {
-          if (!err) 
+          var worksheet = workbook.getWorksheet(1);
+          // worksheet.pageSetup.printArea = 'A1:S50';
+
+
+          worksheet.pageSetup = 
           {
-            var sheetno = 1;
-            var products = [];
-            var totalinc = __.toBigNum(0.0);
-            var totalex = __.toBigNum(0.0);
-            var totalgst = __.toBigNum(0.0);
-            var foldername = global.path.join(__dirname, global.config.folders.orders + custid);
-            var no = __.isNull(header.orderno) ? header.invoiceno : header.orderno;
-            var filename = global.config.defaults.defaultPrefixOrderFilename + no + global.config.defaults.defaultXLExtension;
-            var lineno = 1;
+            paperSize: 9,
+            orientation: 'landscape',
+            printTitlesRow: '1:15',
+            scale: 57,
+            firstPageNumber: 1
+          }
+          worksheet.pageSetup.horizontalCentered = true; 
+          worksheet.properties.defaultRowHeight = 60;
+          
+          
+
+
+
+          var rowValues = [];
+          var sheetno = 1;
+          var products = [];
+          var totalinc = __.toBigNum(0.0);
+          var totalex = __.toBigNum(0.0);
+          var totalgst = __.toBigNum(0.0);
+          var foldername = global.path.join(__dirname, global.config.folders.orders + custid);
+          var no = __.isNull(header.orderno) ? header.invoiceno : header.orderno;
+          var filename = global.config.defaults.defaultPrefixOrderFilename + no + global.config.defaults.defaultXLExtension;
+          var lineno = 1;
+          var currentLine = 15;
+
+            
+
+          
+              workbook.worksheets[0].getCell('M12').value = __.sanitiseAsString(uname);
+              workbook.worksheets[0].getCell('M13').value = header.activeversion;
+              workbook.worksheets[0].getCell('M14').value = __.sanitiseAsString(header.datemodified);
+              workbook.worksheets[0].getCell('R7').value = __.sanitiseAsString(header.orderno);
+              workbook.worksheets[0].getCell('R9').value = global.moment(__.sanitiseAsString(header.datecreated)).format('LL');
+              workbook.worksheets[0].getCell('R10').value = __.sanitiseAsString(header.pono);
+              workbook.worksheets[0].getCell('R11').value = __.sanitiseAsString(header.clienthscode);
+              workbook.worksheets[0].getCell('R12').value = __.sanitiseAsString(header.clientcode);
+
+              console.log(workbook.worksheets[0].getCell('A8').value);
+              console.log(workbook.worksheets[0].getCell('A9').value);
+              console.log(workbook.worksheets[0].getCell('A10').value);
+              console.log(workbook.worksheets[0].getCell('A11').value);
+              console.log(workbook.worksheets[0].getCell('A12').value);
+              console.log(workbook.worksheets[0].getCell('A13').value);
+
+              worksheet.getCell('A8').value = __.isBlank(header.ordername) ? __.sanitiseAsString(header.clientname) : __.sanitiseAsString(header.ordername);
+              worksheet.getCell('A9').value = 'Att: ' + (__.isBlank(header.clientcontact1) ? '' : __.sanitiseAsString(header.clientcontact1));
+              worksheet.getCell('A10').value = (__.isBlank(header.invoicetoaddress1) ? '' : __.sanitiseAsString(header.invoicetoaddress1)) + ',' + (__.isBlank(header.invoicetoaddress2) ? '' : __.sanitiseAsString(header.invoicetoaddress2));
+              worksheet.getCell('A11').value = (__.isBlank(header.invoicetocity) ? '' : __.sanitiseAsString(header.invoicetocity)) + ',' + 
+                                              (__.isBlank(header.invoicetostate) ? '' : __.sanitiseAsString(header.invoicetostate)) + ',' + 
+                                              (__.isBlank(header.invoicetopostcode) ? '' : __.sanitiseAsString(header.invoicetopostcode));
+              worksheet.getCell('A12').value = (__.isBlank(header.invoicetocountry) ? '' : __.sanitiseAsString(header.invoicetocountry));
+              worksheet.getCell('A13').value = (__.isUndefined(header.custphone1) ? '' : __.sanitiseAsString(header.invoicetocountry));
+
+              worksheet.getCell('F8').value = (__.isBlank(header.ordername) ? __.sanitiseAsString(header.clientname) : __.sanitiseAsString(header.ordername));
+              worksheet.getCell('F9').value = 'Att: ' + (__.isBlank(header.clientcontact1) ? '' : __.sanitiseAsString(header.clientcontact1))
+              worksheet.getCell('F10').value = (__.isBlank(header.shiptoaddress1) ? '' : __.sanitiseAsString(header.shiptoaddress1)) + ',' +
+                                              (__.isBlank(header.shiptoaddress2) ? '' : __.sanitiseAsString(header.shiptoaddress2));
+              worksheet.getCell('F11').value = (__.isBlank(header.shiptocity) ? '' : __.sanitiseAsString(header.shiptocity)) + ',' + 
+                                              (__.isBlank(header.shiptostate) ? '' : __.sanitiseAsString(header.shiptostate)) + ',' + 
+                                              (__.isBlank(header.shiptopostcode) ? '' : __.sanitiseAsString(header.shiptopostcode));
+              worksheet.getCell('F12').value = (__.isBlank(header.shiptocountry) ? '' : __.sanitiseAsString(header.shiptocountry));
+              worksheet.getCell('F13').value = (__.isUndefined(header.custphone1) ? '' : __.sanitiseAsString(header.custphone1));
+
+            
+              console.log(workbook.worksheets[0].getCell('A8').value);
+              console.log(workbook.worksheets[0].getCell('A9').value);
+              console.log(workbook.worksheets[0].getCell('A10').value);
+              console.log(workbook.worksheets[0].getCell('A11').value);
+              console.log(workbook.worksheets[0].getCell('A12').value);
+              console.log(workbook.worksheets[0].getCell('A13').value);
+
 
             details.forEach
               (
@@ -967,6 +1048,7 @@ function doGenOrder(tx, custid, header, details, templatename, uname)
                 totalex = totalex.plus(subex);
                 totalinc = totalinc.plus(subinc);
 
+
                 products.push
                   (
                   {
@@ -982,9 +1064,79 @@ function doGenOrder(tx, custid, header, details, templatename, uname)
                     subtotalgst: __.niceformatnumber(subgst, 2)
                   }
                   );
+                
+                // workbook.worksheets[0].addRow({
+                //   id: 16,
+                //   value: 
+                // });  
+
+
+                var newRowValues = [];
+
+                newRowValues[1] = r.qty;
+                newRowValues[2] =  r.productcode,
+                newRowValues[8] = r.productname,
+                newRowValues[14] = '',
+                newRowValues[15] = __.niceformatnumber(r.price, 2),
+                newRowValues[16] = __.niceformatnumber(r.expressfee, 2),
+                newRowValues[17] = __.niceformatnumber(r.discount, 2),
+                newRowValues[18] =  __.niceformatnumber(subex, 2),
+                newRowValues[19] = __.niceformatnumber(subgst, 2)
+
+                rowValues.push(newRowValues);
+                
+                currentLine = 15 + rowValues.length;
+                if (currentLine > 41)
+                {
+                  var newCurrentLine1 = [];
+                  var newCurrentLine2 = [];
+                  worksheet.spliceRows(currentLine,1, newCurrentLine1, newCurrentLine2); 
+                  
+
+                }
+
+                // if (currentLine > 16)
+                // {
+                //   worksheet.rows
+                // }
+
+                var index = 15 + rowValues.length;
+                worksheet.getRow(index).values = newRowValues;
+                if (index%2 == 0)
+                {
+                  
+                      var i = 1;
+                      var calls = new Array(19);
+                      calls.forEach(element => {
+                        worksheet.getRow(index).getCell(i++).fill =
+                          {
+                            type: 'pattern',
+                            pattern: 'lightGray'
+                          };
+                      });
+                      
+                }
+                // worksheet.getRow(index). getCell('1:19').border = {bottom: {style: 'thin'}};
+                
+                
+                worksheet.getRow(index).getCell(1).border = {left: {style: 'thin'},right: {style: 'thin'}};
+                worksheet.getRow(index).getCell(7).border = {right: { style: 'thin' }};
+                worksheet.getRow(index).getCell(13).border = {right: { style: 'thin' }};
+                worksheet.getRow(index).getCell(14).border = {right: { style: 'thin' }};
+                worksheet.getRow(index).getCell(15).border = {right: { style: 'thin' }};
+                worksheet.getRow(index).getCell(16).border = {right: { style: 'thin' }};
+                worksheet.getRow(index).getCell(17).border = {right: { style: 'thin' }};
+                worksheet.getRow(index).getCell(18).border = {right: { style: 'thin' }};
+                worksheet.getRow(index).getCell(19).border = {right: { style: 'thin' }};
+                // worksheet
+                
               }
               );
+              
 
+
+            
+          
             // console.log(products);
             var values =
             {
@@ -997,17 +1149,17 @@ function doGenOrder(tx, custid, header, details, templatename, uname)
               custname: __.isBlank(header.ordername) ? __.sanitiseAsString(header.clientname) : __.sanitiseAsString(header.ordername),
               custvendorcode: __.sanitiseAsString(header.clientcode),
 
-              custcontact1: __.sanitiseAsString(header.clientcontact1),
-              custcontact2: __.sanitiseAsString(header.clientcontact2),
+              custcontact1: __.isBlank(header.clientcontact1) ? '' : __.sanitiseAsString(header.clientcontact1),
+              custcontact2: __.isBlank(header.clientcontact2) ? '' : __.sanitiseAsString(header.clientcontact2),
 
-              custshipnotes: '',
-
-              custaddress1: __.sanitiseAsString(header.invoicetoaddress1),
-              custaddress2: __.sanitiseAsString(header.invoicetoaddress2),
-              custcity: __.sanitiseAsString(header.invoicetocity),
-              custpostcode: __.sanitiseAsString(header.invoicetopostcode),
-              custstate: __.sanitiseAsString(header.invoicetostate),
-              custcountry: __.sanitiseAsString(header.invoicetocountry),
+              custaddress1: (__.isBlank(header.invoicetoaddress1) || __.isNull(header.invoicetoaddress1) || __.isUndefined(header.invoicetoaddress1))? '': __.sanitiseAsString(header.invoicetoaddress1),
+              // custaddress1: __.isUndefined(header.invoicetoaddress1) ? ' ' : __.sanitiseAsString(header.invoicetoaddress1),
+              custaddress2: __.isNull(header.invoicetoaddress2) ? " " : __.sanitiseAsString(header.invoicetoaddress2),
+              custcity: __.isNull(header.invoicetocity) ? ' ' : __.sanitiseAsString(header.invoicetocity),
+              custpostcode: __.isNull(header.invoicetopostcode) ? ' ' : __.sanitiseAsString(header.invoicetopostcode),
+              custstate: __.isNull(header.invoicetostate) ? ' ' : __.sanitiseAsString(header.invoicetostate),
+              custcountry: __.isNull(header.invoicetocountry) ? ' ' : __.sanitiseAsString(header.invoicetocountry),
+              custphone1: __.isNull(header.custphone1) ? ' ' : __.sanitiseAsString(header.custphone1),
 
               custaddress1: __.sanitiseAsString(header.shiptoaddress1),
               custaddress2: __.sanitiseAsString(header.shiptoaddress2),
@@ -1033,14 +1185,124 @@ function doGenOrder(tx, custid, header, details, templatename, uname)
               orderapplied: '',
               ordergrandtotal: __.niceformatnumber(totalinc, 2),
 
+              custshipnotes: '',
+
               product: products
             };
 
+            
 
-            // template.substitute(sheetno, values);
-            // blob = template.generate();
-            // template.substitute(sheetno, values);
-            // blob = template.generate();
+          
+
+          // workbook.worksheets[0].spliceRows(16, 1, rowValues(3));
+
+
+          // if (currentLine <= 41)
+          // {
+          //   worksheet.getCell('R43').value = __.niceformatnumber(totalex, 2);
+          //   worksheet.getCell('R44').value = __.niceformatnumber(totalgst, 2);
+          //   worksheet.getCell('R45').value = __.niceformatnumber(totalinc, 2);
+          //   worksheet.getCell('R46').value = __.niceformatnumber(totalinc, 2);
+          // }
+          // else
+          // {
+            var row1 = worksheet.lastRow.number - 7;
+            var row2 = worksheet.lastRow.number - 6;
+            var row3 = worksheet.lastRow.number - 5;
+            var row4 = worksheet.lastRow.number - 3;
+            worksheet.getRow(row1).getCell(19).value = __.niceformatnumber(totalex, 2);
+            worksheet.getRow(row2).getCell(19).value = __.niceformatnumber(totalgst, 2);
+            worksheet.getRow(row3).getCell(19).value = __.niceformatnumber(totalinc, 2);
+            worksheet.getRow(row4).getCell(19).value = __.niceformatnumber(totalinc, 2);
+            worksheet.getRow(row1).getCell(17).font = { bold: true };
+            worksheet.getRow(row2).getCell(17).font = { bold: true };
+            worksheet.getRow(row3).getCell(17).font = { bold: true };
+            worksheet.getRow(row4).getCell(17).font = { bold: true };
+
+          worksheet.getRow(row1).getCell(19).alignment = { horizontal: 'right', wrapText: false };
+          worksheet.getRow(row2).getCell(19).alignment = { horizontal: 'right', wrapText: false };
+          worksheet.getRow(row3).getCell(19).alignment = { horizontal: 'right', wrapText: false };
+          worksheet.getRow(row4).getCell(19).alignment = { horizontal: 'right', wrapText: false };
+          worksheet.getRow(row4 + 3).getCell(19).alignment = { horizontal: 'right', wrapText: false };
+
+          worksheet.getRow(row1).getCell(17).alignment = { horizontal: 'right' };
+          worksheet.getRow(row2).getCell(17).alignment = { horizontal: 'right' };
+          worksheet.getRow(row3).getCell(17).alignment = { horizontal: 'right' };
+          worksheet.getRow(row4).getCell(17).alignment = { horizontal: 'right' };
+          worksheet.getRow(row4 + 3).getCell(17).alignment = { horizontal: 'right' };
+
+          
+
+            worksheet.getRow(row1).eachCell
+            (
+              {includeEmpty: true}, 
+              function (cell, colNumber) 
+              {
+                cell.border = {
+                  top: {style: 'thick'}
+                };
+                
+              }
+            );
+            
+
+            worksheet.getRow(worksheet.lastRow.number).eachCell
+            (
+              {includeEmpty: true},
+              function (cell, colNumber) 
+              {
+                cell.border = {
+                  bottom: {style: 'thick'}
+                };
+              }
+            );
+
+          worksheet.getRow(row1 - 1).getCell(19).border = { right: { style: 'thin' }, left: { style: 'thin' } };
+          worksheet.getRow(row1 - 1).getCell(18).border = { left: { style: 'thin' }};
+          worksheet.getRow(row1 - 1).getCell(17).border = { left: { style: 'thin' } };
+          worksheet.getRow(row1 - 1).getCell(16).border = { left: { style: 'thin' } };
+          worksheet.getRow(row1 - 1).getCell(15).border = { left: { style: 'thin' } };
+          worksheet.getRow(row1 - 1).getCell(14).border = { left: { style: 'thin' } };
+          worksheet.getRow(row1 - 1).getCell(8).border = { left: { style: 'thin' } };
+          worksheet.getRow(row1 - 1).getCell(2).border = { left: { style: 'thin' } };
+          worksheet.getRow(row1 - 1).getCell(1).border = { left: { style: 'thin' }, right: { style: 'thin' } };
+
+
+          worksheet.getRow(row1).getCell(19).border = { right: { style: 'thin' }, top: { style: 'thick' }};
+          worksheet.getRow(row2).getCell(19).border = { right: { style: 'thin' } };
+          worksheet.getRow(row3).getCell(19).border = { right: { style: 'thin' } };
+          worksheet.getRow(row3 + 1).getCell(19).border = { right: { style: 'thin' } };
+          worksheet.getRow(row4).getCell(19).border = { right: { style: 'thin' } };
+          worksheet.getRow(row4 + 1).getCell(19).border = { right: { style: 'thin' } };
+          worksheet.getRow(row4 + 2).getCell(19).border = { right: { style: 'thin' } };
+          worksheet.getRow(row4 + 3).getCell(19).border = { right: { style: 'thin' }, bottom: {style: 'thick'} };
+          
+          
+          worksheet.getRow(row1).getCell(1).border = { left: { style: 'thin' }, top: { style: 'thick' }, bottom: {style: 'thick'}  };
+          worksheet.getRow(row2).getCell(1).border = { left: { style: 'thin' } };
+          worksheet.getRow(row3).getCell(1).border = { left: { style: 'thin' } };
+          worksheet.getRow(row3 + 1).getCell(1).border = { left: { style: 'thin' } };
+          worksheet.getRow(row4).getCell(1).border = { left: { style: 'thin' } };
+          worksheet.getRow(row4 + 1).getCell(1).border = { left: { style: 'thin' } };
+          worksheet.getRow(row4 + 2).getCell(1).border = { left: { style: 'thin' } };
+          worksheet.getRow(row4 + 3).getCell(1).border = { left: { style: 'thin' }, bottom: { style: 'thick' }  };
+
+
+          worksheet.mergeCells(row1,1,(row4 + 3),7);
+          worksheet.mergeCells(row1,8,(row4 + 3), 14);
+          worksheet.getRow(row1).getCell(8).border = { top: { style: 'thick' }, bottom: { style: 'thick' } };
+
+          // }  
+
+          if (worksheet.lastRow.number > 60)
+            worksheet.getRow(51).addPageBreak();
+          
+          console.log(worksheet.rowCount);
+          console.log(worksheet.lastRow.number);
+          
+          
+          
+          worksheet.pageSetup.horizontalCentered = true; 
             
             ensureFolderExists
             (
@@ -1053,6 +1315,7 @@ function doGenOrder(tx, custid, header, details, templatename, uname)
                   workbook.xlsx.writeFile(foldername + '/' + filename)
                   .then
                   (
+                    
                     function (err) 
                     {
                       if (!err)
@@ -1066,197 +1329,11 @@ function doGenOrder(tx, custid, header, details, templatename, uname)
                   reject(err);
               }
             );        
-          } 
-          else 
-            reject(err);
-
+          
         }
       );
 
-      // ******
-      // fs.readFile
-      // (
-      //   templatename,
-      //   function(err, data)
-      //   {
-      //     if (!err)
-      //     {
-      //       var sheetno = 1;
-      //       var template = new global.xlwriter(data);
-      //       var blob = null;
-      //       var products = [];
-      //       var totalinc = __.toBigNum(0.0);
-      //       var totalex = __.toBigNum(0.0);
-      //       var totalgst = __.toBigNum(0.0);
-      //       var foldername = global.path.join(__dirname, global.config.folders.orders + custid);
-      //       var no = __.isNull(header.orderno) ? header.invoiceno : header.orderno; 
-      //       var filename = global.config.defaults.defaultPrefixOrderFilename + no + global.config.defaults.defaultXLExtension;
-      //       var lineno = 1;
-
-      //       details.forEach
-      //       (
-      //         function(r)
-      //         {
-      //           var p = __.toBigNum(r.price);
-      //           var g = __.toBigNum(r.gst);
-      //           var q = __.toBigNum(r.qty);
-      //           var d = __.toBigNum(r.discount);
-      //           var f = __.toBigNum(r.expressfee);
-      //           var t1 = p.times(q);
-      //           var t2 = g.times(q);
-
-      //           // Discount and express fee...
-      //           // +GST
-      //           var subd = t1.times(d).div(100.0);
-      //           var subf = t1.times(f).div(100.0);
-      //           // -GST
-      //           var subgstd = t2.times(d).div(100.0);
-      //           var subgstf = t2.times(f).div(100.0);
-
-      //           var subgst = t2.plus(subgstf).minus(subgstd);
-      //           var subex = t1.plus(subf).minus(subd);
-      //           var subinc = subgst.plus(subex);
-
-      //           /*
-      //           console.log( __.formatnumber(p, 4));
-      //           console.log( __.formatnumber(q, 4));
-      //           console.log( __.formatnumber(qu, 4));
-
-      //           console.log( __.formatnumber(subgst, 4));
-      //           console.log( __.formatnumber(subex, 4));
-      //           console.log( __.formatnumber(subinc, 4));
-
-      //           console.log( __.formatnumber(subgst, 2));
-      //           console.log( __.formatnumber(subex, 2));
-      //           console.log( __.formatnumber(subinc, 2));
-      //           */
-
-      //           totalgst = totalgst.plus(subgst);
-      //           totalex = totalex.plus(subex);
-      //           totalinc = totalinc.plus(subinc);
-
-      //           /*
-      //           products.push
-      //           (
-      //             {
-      //               lineno: lineno++,
-      //               code: d.productcode,
-      //               name: d.productname,
-      //               unit: '',
-      //               gst: __.niceformatnumber(d.gst, 2),
-      //               qty: __.niceformatnumber(d.qty, 2),
-      //               price: __.niceformatnumber(d.price, 2),
-      //               subtotal: __.niceformatnumber(subex, 2)
-      //             }
-      //           );
-      //           */
-      //           products.push
-      //           (
-      //             {
-      //               lineno: lineno++,
-      //               code: r.productcode,
-      //               name: r.productname,
-      //               price: __.niceformatnumber(r.price, 2),
-      //               gst: __.niceformatnumber(r.gst, 2),
-      //               qty: __.niceformatnumber(r.qty, 2),
-      //               discount: __.niceformatnumber(r.discount, 2),
-      //               expressfee: __.niceformatnumber(r.expressfee, 2),
-      //               subtotal: __.niceformatnumber(subex, 2),
-      //               subtotalgst: __.niceformatnumber(subgst, 2)
-      //             }
-      //           );
-      //         }
-      //       );
-
-      //       // console.log(products);
-      //       var values =
-      //       {
-      //         orderinvoiceno: __.sanitiseAsString(header.invoiceno),
-      //         orderorderno: __.sanitiseAsString(header.orderno),
-      //         custpo: __.sanitiseAsString(header.pono),
-      //         orderinvoicedate: global.moment(__.sanitiseAsString(header.invoicedate)).format('LL'),
-      //         orderstartdate: global.moment(__.sanitiseAsString(header.datecreated)).format('LL'),
-
-      //         custname: __.isBlank(header.ordername) ? __.sanitiseAsString(header.clientname) : __.sanitiseAsString(header.ordername),
-      //         custvendorcode: __.sanitiseAsString(header.clientcode),
-
-      //         custcontact1: __.sanitiseAsString(header.clientcontact1),
-      //         custcontact2: __.sanitiseAsString(header.clientcontact2),
-
-      //         custshipnotes: '',
-
-      //         custaddress1: __.sanitiseAsString(header.invoicetoaddress1),
-      //         custaddress2: __.sanitiseAsString(header.invoicetoaddress2),
-      //         custcity: __.sanitiseAsString(header.invoicetocity),
-      //         custpostcode: __.sanitiseAsString(header.invoicetopostcode),
-      //         custstate: __.sanitiseAsString(header.invoicetostate),
-      //         custcountry: __.sanitiseAsString(header.invoicetocountry),
-
-      //         custaddress1: __.sanitiseAsString(header.shiptoaddress1),
-      //         custaddress2: __.sanitiseAsString(header.shiptoaddress2),
-      //         custcity: __.sanitiseAsString(header.shiptocity),
-      //         custpostcode: __.sanitiseAsString(header.shiptopostcode),
-      //         custstate: __.sanitiseAsString(header.shiptostate),
-      //         custcountry: __.sanitiseAsString(header.shiptocountry),
-
-      //         custacn: __.sanitiseAsString(header.clientacn),
-      //         custabn: __.sanitiseAsString(header.clientabn),
-      //         custhscode: __.sanitiseAsString(header.clienthscode),
-      //         custcustcode1: __.sanitiseAsString(header.clientcustcode1),
-      //         custcustcode2: __.sanitiseAsString(header.clientcustcode2),
-
-      //         prepearedby: __.sanitiseAsString(uname),
-      //         orderrevno: header.activeversion,
-      //         orderrevdate: __.sanitiseAsString(header.datemodified),
-
-      //         ordertotal: __.niceformatnumber(totalex, 2),
-      //         orderdeliveryfee: '',
-      //         ordergstamount: __.niceformatnumber(totalgst, 2),
-      //         orderincgst: __.niceformatnumber(totalinc, 2),
-      //         orderapplied: '',
-      //         ordergrandtotal: __.niceformatnumber(totalinc, 2),
-
-      //         product: products
-      //       };
-
-            
-      //       template.substitute(sheetno, values);
-      //       blob = template.generate();
-      //       template.substitute(sheetno, values);
-      //       blob = template.generate();
-
-      //       ensureFolderExists
-      //       (
-      //         foldername,
-      //         0775,
-      //         function(err)
-      //         {
-      //           if (!err)
-      //           {
-      //             fs.writeFile
-      //             (
-      //               foldername + '/' + filename,
-      //               blob,
-      //               'binary',
-      //               function(err)
-      //               {
-      //                 if (!err)
-      //                   resolve({orderno: header.orderno, invoiceno: header.invoiceno, basename: filename, fullpath: foldername + '/' + filename});
-      //                 else
-      //                   reject(err);
-      //               }
-      //             );
-      //           }
-      //           else
-      //             reject(err);
-      //         }
-      //       );
-      //     }
-      //     else
-      //       reject(err);
-      //   }
-      // );
-      //***** */
+      
     }
   );
   return promise;
