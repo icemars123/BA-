@@ -23,6 +23,8 @@ function doPermissionTemplatesTabWidgets()
 
     function doNew() 
     {
+        
+
         console.log('gavin1');
         var tb =
             [
@@ -30,13 +32,17 @@ function doPermissionTemplatesTabWidgets()
                     text: 'Save',
                     iconCls: 'icon-save',
                     handler: doSave
+                },
+                {
+                    type: 'textbox',
                 }
+                
             ];
 
 
 
         function doSave() {
-            var rows = $('#divPermissionTemplatedsPG').propertygrid('getRows');
+            var rows = $('#divPermissionTemplatesPG').propertygrid('getRows');
             var permissions =
             {
                 canvieworders: rows[0].value,
@@ -94,13 +100,28 @@ function doPermissionTemplatesTabWidgets()
             return row;
         }
 
+        function doCreateRowName(name, value, group) {
+            var row =
+            {
+                name: name,
+                value: value,
+                group: group,
+                editor:
+                {
+                    type: 'textarea',
+                }
+            };
+
+            return row;
+        }
+
         function doSaved(ev, args) {
-            $('#dlgUserPermissions').dialog('close');
+            $('#dlgPermissionTemplates').dialog('close');
         }
 
         $('#divEvents').on('saveuserpermissions', doSaved);
 
-        $('#dlgUserPermissions').dialog
+        $('#dlgPermissionTemplates').dialog
             (
             {
                 title: 'Create Permission Template',
@@ -108,12 +129,43 @@ function doPermissionTemplatesTabWidgets()
                     $('#divEvents').off('saveuserpermissions', doSaved);
                 },
                 onOpen: function () {
-                    $('#divPermissionTemplatedsPG').propertygrid
+                    $('#divPermissionTemplatesPG1').propertygrid
+                    (
+                        {
+                            showGroup: true,
+                            scrollbarSize: 0,
+
+                            loader: function (param, success, error) 
+                            {
+                                cache_permissionTemplateNames = [];
+
+                                cache_permissionTemplateNames.push(doCreateRowName('Name', '', 'Template'));
+                                success({ total: cache_permissionTemplateNames.length, rows: cache_permissionTemplateNames });
+                            },
+                                columns:
+                                    [
+
+                                        [
+                                            { field: 'name', title: 'Name', width: 70 },
+                                            {
+                                                field: 'value',
+                                                title: 'Value',
+                                                width: 100
+                                            }
+                                        ]
+                                    ]
+
+                        }
+                            
+                    );
+
+                    $('#divPermissionTemplatesPG2').propertygrid
                         (
                         {
                             showGroup: true,
                             scrollbarSize: 0,
-                            toolbar: tb,
+                            // toolbar: tb,
+
                             loader: function (param, success, error) {
                                 cache_userpermissions = [];
 
@@ -159,16 +211,17 @@ function doPermissionTemplatesTabWidgets()
                                 cache_userpermissions.push(doMakeRowProperty('Can View', false, 'Dashboard'));
                                 cache_userpermissions.push(doMakeRowProperty('Can Create', false, 'Dashboard'));
 
-                                success({ total: cache_userpermissions.length, rows: cache_userpermissions });
+                                success({ total: cache_userpermissions.length, rows: cache_userpermissions});
                             },
                             columns:
                                 [
+                                    
                                     [
-                                        { field: 'name', title: 'Action', width: 100 },
+                                        { field: 'name', title: 'Action', width: 70 },
                                         {
                                             field: 'value',
                                             title: 'Permission',
-                                            width: 80,
+                                            width: 100,
                                             formatter: function (value, row, index) {
                                                 return mapBoolToImage(value);
                                             }
@@ -181,9 +234,15 @@ function doPermissionTemplatesTabWidgets()
                 buttons:
                     [
                         {
+                            text: 'Add',
+                            diable: true,
+
+
+                        },
+                        {
                             text: 'Close',
                             handler: function () {
-                                $('#dlgUserPermissions').dialog('close');
+                                $('#dlgPermissionTemplates').dialog('close');
                             }
                         }
                     ]
