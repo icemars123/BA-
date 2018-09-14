@@ -3081,7 +3081,7 @@ function main()
       addListener('emailhistory',                         'emailhistory',                         global.modmsg.EmailHistory,                            ['maxhistory']);
 
       // Permission requests
-      addListener('newpermissiontemplate', 'newpermissiontemplate',)
+      addListener('newpermissiontemplate',                'newpermissiontemplate',                global.modpermission.NewPermissionTemplate,            ['*name', 'canvieworders', 'cancreateorders', 'canviewinvoices', 'cancreateinvoices', 'canviewinventory', 'cancreateinventory', 'canviewpayroll', 'cancreatepayroll', 'canviewproducts', 'cancreateproducts', 'canviewclients', 'cancreateclients', 'canviewcodes', 'cancreatecodes', 'canviewusers', 'cancreateusers', 'canviewbuilds', 'cancreatebuilds', 'canviewtemplates', 'cancreatetemplates', 'canviewbanking', 'cancreatebanking', 'canviewpurchasing', 'cancreatepurchasing', 'canviewalerts', 'cancreatealerts', 'canviewdashboard','cancreatedashboard']);
 
       // *******************************************************************************************************************************************************************************************
       // MDM events...

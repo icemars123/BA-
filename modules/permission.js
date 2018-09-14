@@ -2,7 +2,80 @@
 // Internal functions
 function doNewPermissionTemplate(tx, world) 
 {
-    
+    var promise = new global.rsvp.Promise
+    (
+        function (resolve, reject) 
+        {
+            tx.query
+            (
+                'insert into permissiontemplatedetails (name,canvieworders,cancreateorders,canviewinvoices,cancreateinvoices,canviewinventory,cancreateinventory,canviewpayroll,cancreatepayroll,canviewproducts,cancreateproducts,canviewclients,cancreateclients,canviewcodes,cancreatecodes,canviewusers,cancreateusers,canviewbuilds,cancreatebuilds,canviewtemplates,cancreatetemplates,canviewbanking,cancreatebanking,canviewpurchasing,cancreatepurchasing,canviewalerts,cancreatealerts,canviewdashboard,cancreatedashboard) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29) returning id', 
+                [
+                    __.sanitiseAsString(world.name, 50),
+
+                    world.canvieworders,
+                    world.cancreateorders,
+                    world.canviewinvoices,
+                    world.cancreateinvoices,
+                    world.canviewproducts,
+                    world.cancreateproducts,
+                    world.canviewinventory,
+                    world.cancreateinventory,
+                    world.canviewpayroll,
+                    world.cancreatepayroll,
+                    world.canviewcodes,
+                    world.cancreatecodes,
+                    world.canviewclients,
+                    world.cancreateclients,
+                    world.canviewusers,
+                    world.cancreateusers,
+                    world.canviewbuilds,
+                    world.cancreatebuilds,
+                    world.canviewtemplates,
+                    world.cancreatetemplates,
+                    world.canviewbanking,
+                    world.cancreatebanking,
+                    world.canviewpurchasing,
+                    world.cancreatepurchasing,
+                    world.canviewalerts,
+                    world.cancreatealerts,
+                    world.canviewdashboard,
+                    world.cancreatedashboard
+                ],
+                function (err, result) 
+                {
+                    if (!err) 
+                    {
+                        var permissiontemplateid = result.rows[0].id;
+
+                        tx.query
+                        (
+                            'select * from permissiontemplatedetails where id = $1',
+                            [
+                                __.sanitiseAsBigInt(permissiontemplateid)
+                            ],
+                            function (err, result) 
+                            {
+                                if (!err) 
+                                {
+                                    var pc = result.rows[0];
+
+                                    resolve({permissiontemplateid: permissiontemplateid })
+                                } 
+                                else 
+                                
+                            }
+                        );
+                    } 
+                    else 
+                    {
+                        reject(err);
+                    }
+                }
+            );
+        }
+    );
+
+    return promise;
 }
 
 
@@ -12,7 +85,111 @@ function doNewPermissionTemplate(tx, world)
 // Public functions
 function NewPermissionTemplate(world) 
 {
-    
+    var msg = '[' + world.eventname + '] ';
+    // ******
+    global.pg.connect
+    (
+        global.console,
+        function (err, client, done) 
+        {
+            if (!err) 
+            {
+                var tx = new global.pgtx(client);
+                tx.begin
+                (
+                    function (err) 
+                    {
+                        if (!err) 
+                        {
+                            doNewPermissionTemplate(tx, world).then
+                            (
+                                function (result) 
+                                {
+                                    tx.commit
+                                    (
+                                        function (err) 
+                                        {
+                                            if (!err) 
+                                            {
+                                                done();
+                                                world.spark.emit
+                                                (
+                                                    world.eventname,
+                                                    {
+                                                        rc: global.errcode_none,
+                                                        msg: global.text_success,
+                                                        permissiontemplateid: result.permissiontemplateid,
+                                                        // datecreated: result.datecreated,
+                                                        // usercreated: result.usercreated,
+                                                        pdata: world.pdata
+                                                    }
+                                                );
+                                                global.pr.sendToRoomExcept
+                                                (
+                                                    global.custchannelprefix + world.cn.custid,
+                                                    'permissiontemplatecreated',
+                                                    {
+                                                        permissiontemplateid: result.permissiontemplateid,
+                                                        // datecreated: result.datecreated,
+                                                        // usercreated: result.usercreated
+                                                    },
+                                                    world.spark.id
+                                                );
+                                                // global.pr.sendToRomm();
+                                            } 
+                                            else 
+                                            {
+                                                tx.rollback
+                                                (
+                                                    function (ignore) 
+                                                    {
+                                                        done();
+                                                        msg += global.text_tx + ' ' + err.message;
+                                                        global.log.error({newpermissiontemplate: true}, msg);
+                                                        world.spark.emit(global.eventerror, { rc: global.errcode_dberr, msg: msg, pdata: world.pdata });
+                                                    }
+                                                );
+                                            }
+                                        }
+                                    );
+                                }
+                            ).then
+                            (
+                                null,
+                                function (err) 
+                                {
+                                    tx.rollback
+                                    (
+                                        function (ignore) 
+                                        {
+                                            done();
+
+                                            msg += global.text_generalexception + ' ' + err.message;
+                                            global.log.error({ newpermissiontemplate: true}, msg);
+                                            world.spark.emit(global.eventerror, { rc: global.errcode_fatal, msg: msg, pdata: world.pdata });
+                                        }
+                                    );
+                                }
+                            );
+                        } 
+                        else 
+                        {
+                            done();
+                            msg += global.text_nodbconnection + ' ' + err.message;
+                            global.log.error({newpermissiontemplate: true}, msg);
+                            world.spark.emit(global.eventerror, {rc: global.errcode.dberr, msg: msg, pdata: world.pdata});                           
+                        }
+                        
+                    }
+                );
+            } 
+            else 
+            {
+                global.log.error({ newpermissiontemplate: true}, global.text_nodbconnection);
+                world.spark.emit(global.eventerror, { rc: global.errcode_dbunavail, msg: global.text_nodbconnection, pdata: world.pdata});
+            }
+        }
+    );
 }
 
 
