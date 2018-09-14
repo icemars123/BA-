@@ -78,6 +78,7 @@ global.modpayroll = require('./modules/payroll');
 global.modscripts = require('./modules/scripts');
 global.modpos = require('./modules/pos');
 global.modgov = require('./modules/gov');
+global.modpermission = require('./modules/permission');
 // Custom implementations
 global.modtpcc = require('./modules/tpcc');
 
@@ -3078,6 +3079,9 @@ function main()
       addListener('chatmsg',                              'chatmsg',                              global.modmsg.ChatMsg,                                 ['*msg', 'recipients']);
       addListener('msghistory',                           'msghistory',                           global.modmsg.MsgHistory,                              ['maxhistory']);
       addListener('emailhistory',                         'emailhistory',                         global.modmsg.EmailHistory,                            ['maxhistory']);
+
+      // Permission requests
+      addListener('newpermissiontemplate', 'newpermissiontemplate',)
 
       // *******************************************************************************************************************************************************************************************
       // MDM events...
