@@ -85,6 +85,7 @@ function doDlgPermissionTemplateNew(templateid)
             editor:
             {
                 type: 'textarea',
+                id: 'fldNewPermissionTemplateName',
             }
         };
 
@@ -100,7 +101,7 @@ function doDlgPermissionTemplateNew(templateid)
     $('#dlgPermissionTemplates').dialog
         (
         {
-            title: 'Create Permission Template',
+            title: 'Create User Permission Template',
             onClose: function () {
                 $('#divEvents').off('saveuserpermissions', doSaved);
             },
@@ -129,7 +130,6 @@ function doDlgPermissionTemplateNew(templateid)
                                     }
                                 ]
                             ]
-
                     }
 
                     );
@@ -210,9 +210,103 @@ function doDlgPermissionTemplateNew(templateid)
                 [
                     {
                         text: 'Add',
-                        diable: true,
+                        id: 'btnPermissionTemplateNewAdd',
+                        handler: function () 
+                        {
+                            var name = $('#divPermissionTemplatesPG1').propertygrid('getRows')[0].value;
+                            
+                            var canvieworders = $('#divPermissionTemplatesPG2').propertygrid('getRows')[0].value;
+                            var cancreateorders = $('#divPermissionTemplatesPG2').propertygrid('getRows')[1].value;
+                            var canviewinvoices = $('#divPermissionTemplatesPG2').propertygrid('getRows')[2].value;
+                            var cancreateinvoices = $('#divPermissionTemplatesPG2').propertygrid('getRows')[3].value;
+                            var canviewinventory = $('#divPermissionTemplatesPG2').propertygrid('getRows')[4].value;
+                            var cancreateinventory = $('#divPermissionTemplatesPG2').propertygrid('getRows')[5].value;
+                            var canviewpayroll = $('#divPermissionTemplatesPG2').propertygrid('getRows')[6].value;
+                            var cancreatepayroll = $('#divPermissionTemplatesPG2').propertygrid('getRows')[7].value;
+                            var canviewproducts = $('#divPermissionTemplatesPG2').propertygrid('getRows')[8].value;
+                            var cancreateproducts = $('#divPermissionTemplatesPG2').propertygrid('getRows')[9].value;
+                            var canviewclients = $('#divPermissionTemplatesPG2').propertygrid('getRows')[10].value;
+                            var cancreateclients = $('#divPermissionTemplatesPG2').propertygrid('getRows')[11].value;
+                            var canviewcodes = $('#divPermissionTemplatesPG2').propertygrid('getRows')[12].value;
+                            var cancreatecodes = $('#divPermissionTemplatesPG2').propertygrid('getRows')[13].value;
+                            var canviewusers = $('#divPermissionTemplatesPG2').propertygrid('getRows')[14].value;
+                            var cancreateusers = $('#divPermissionTemplatesPG2').propertygrid('getRows')[15].value;
+                            var canviewbuilds = $('#divPermissionTemplatesPG2').propertygrid('getRows')[16].value;
+                            var cancreatebuilds = $('#divPermissionTemplatesPG2').propertygrid('getRows')[17].value;
+                            var canviewtemplates = $('#divPermissionTemplatesPG2').propertygrid('getRows')[18].value;
+                            var cancreatetemplates = $('#divPermissionTemplatesPG2').propertygrid('getRows')[19].value;
+                            var canviewbanking = $('#divPermissionTemplatesPG2').propertygrid('getRows')[20].value;
+                            var cancreatebanking = $('#divPermissionTemplatesPG2').propertygrid('getRows')[21].value;
+                            var canviewpurchasing = $('#divPermissionTemplatesPG2').propertygrid('getRows')[22].value;
+                            var cancreatepurchasing = $('#divPermissionTemplatesPG2').propertygrid('getRows')[23].value;
+                            var canviewalerts = $('#divPermissionTemplatesPG2').propertygrid('getRows')[24].value;
+                            var cancreatealerts = $('#divPermissionTemplatesPG2').propertygrid('getRows')[25].value;
+                            var canviewdashboard = $('#divPermissionTemplatesPG2').propertygrid('getRows')[26].value;
+                            var cancreatedashboard = $('#divPermissionTemplatesPG2').propertygrid('getRows')[27].value;
+                            
+                            if (!_.isBlank(name))
+                            {
+                                if (isnew)
+                                {
+                                    doServerDataMessage
+                                    (
+                                        'newpermissiontemplate',
+                                        {
+                                            name: name,
 
+                                            canvieworders: canvieworders,
+                                            cancreateorders: cancreateorders,
 
+                                            canviewinvoices: canviewinvoices,
+                                            cancreateinvoices: cancreateinvoices,
+
+                                            canviewinventory: canviewinventory,
+                                            cancreateinventory: cancreateinventory,
+
+                                            canviewpayroll: canviewpayroll,
+                                            cancreatepayroll: cancreatepayroll,
+
+                                            canviewproducts: canviewproducts,
+                                            cancreateproducts: cancreateproducts,
+
+                                            canviewclients: canviewclients,
+                                            cancreateclients: cancreateclients,
+
+                                            canviewcodes: canviewcodes,
+                                            cancreatecodes: cancreatecodes,
+
+                                            canviewusers: canviewusers,
+                                            cancreateusers: cancreateusers,
+
+                                            canviewbuilds: canviewbuilds,
+                                            cancreatebuilds: cancreatebuilds,
+
+                                            canviewtemplates: canviewtemplates,
+                                            cancreatetemplates: cancreatetemplates,
+
+                                            canviewbanking: canviewbanking,
+                                            cancreatebanking: cancreatebanking,
+
+                                            canviewpurchasing: canviewpurchasing,
+                                            cancreatepurchasing: cancreatepurchasing,
+
+                                            canviewalerts: canviewalerts,
+                                            cancreatealerts: cancreatealerts,
+
+                                            canviewdashboard: canviewdashboard,
+                                            cancreatedashboard: cancreatedashboard
+                                        },
+                                        { type: 'refresh'}
+                                    );
+                                }
+                                else
+                                {
+                                    
+                                }
+                            }
+                            else
+                                doMandatoryTextbox('Please enter a permission template name','fldNewPermissionTemplateName');
+                        }
                     },
                     {
                         text: 'Close',
