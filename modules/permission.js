@@ -62,7 +62,7 @@ function doNewPermissionTemplate(tx, world)
                                     resolve({permissiontemplateid: permissiontemplateid })
                                 } 
                                 else 
-                                
+                                    reject({ message: global.text_unablenewproductcategory });
                             }
                         );
                     } 
