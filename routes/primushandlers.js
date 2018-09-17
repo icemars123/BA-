@@ -1708,6 +1708,52 @@ function doPrimus()
     doAddPrimusListener('expireproducttemplatedetail');
     doAddPrimusListener('syncproducttemplate');
 
+    // Permission template requests
+    doAddPrimusListener('newpermissiontemplate');
+
+    doAddPrimusListener
+    (
+      'listpermissiontemplates',
+      function (eventname, data) {
+        doUpdateInitTasksProgress();
+
+        if (!_.isUN(data.rs)) {
+          cache_permisstiontemplates = [];
+
+          data.rs.forEach
+            (
+            function (p) {
+              var node =
+              {
+                id: doNiceId(p.id),
+                name: doNiceString(p.name),
+                // numproducts: (p.numproducts == 0) ? '' : p.numproducts,
+                // date: doNiceDateModifiedOrCreated(p.datemodified, p.datecreated),
+                // by: doNiceModifiedBy(p.datemodified, p.usermodified, p.usercreated)
+              };
+
+              // if (_.isUN(p.parentid))
+              //   cache_producttemplates.push(node);
+              // else 
+              // {
+              //   var parent = doFindParentNode(cache_producttemplates, p.parentid);
+              //   // Find parent...
+              //   if (!_.isUN(parent))
+              //     parent.children.push(node);
+              // }
+            }
+            );
+
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
+        }
+      }
+    );
+
+
+
+
+
+
     // Inventory requests
     doAddPrimusListener('liststock');
     doAddPrimusListener('addinventory');
@@ -2145,6 +2191,12 @@ function doPrimus()
     doAddPrimusListener('buildtemplateparentchanged');
     doAddPrimusListener('buildtemplateduplicated');
     doAddPrimusListener('buildtemplatedetailexpired');
+
+
+    // Permission template events
+    doAddPrimusListenerEmitter('permissiontemplatecreated', 'listpermissiontemplates');
+
+
 
     // Product template events
     doAddPrimusListenerEmitter('producttemplatecreated', 'listproducttemplates');

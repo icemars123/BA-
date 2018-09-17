@@ -24,9 +24,6 @@ function doPermissionTemplatesTabWidgets()
     function doNew() 
     {
         doDlgPermissionTemplateNew(null);
-
-        console.log('gavin1');
-        
     }
 
     function doClear() 
@@ -136,17 +133,17 @@ function doPermissionTemplatesTabWidgets()
         }
     }
 
-    function doRemoveParent() 
-    {
-        doTreeGridGetSelectedRowData
-            (
-            'divPermissionTemplatesTG',
-            function (row) 
-            {
-                doServerDataMessage('changeproducttemplateparent', { producttemplateid: row.id, parentid: null }, { type: 'refresh' });
-            }
-            );
-    }
+    // function doRemoveParent() 
+    // {
+    //     doTreeGridGetSelectedRowData
+    //         (
+    //         'divPermissionTemplatesTG',
+    //         function (row) 
+    //         {
+    //             doServerDataMessage('changeproducttemplateparent', { producttemplateid: row.id, parentid: null }, { type: 'refresh' });
+    //         }
+    //         );
+    // }
 
     function doCalcUnitCost(value, row, index) 
     {
@@ -161,39 +158,39 @@ function doPermissionTemplatesTabWidgets()
 
     function doFooter() 
     {
-        $('#divPermissionTemplatesTG').treegrid('reloadFooter', [{ code: '<span class="totals_footer">' + doGetCountTreeArray(cache_producttemplates) + ' Templates</span>' }]);
+        $('#divPermissionTemplatesTG').treegrid('reloadFooter', [{ code: '<span class="totals_footer">' + doGetCountTreeArray(cashe_permissiontemplates) + ' Templates</span>' }]);
     }
 
     function doSaved(ev, args) 
     {
-        doServerMessage('listproducttemplates', { type: 'refresh', producttemplateid: args.data.producttemplateid });
+        doServerMessage('listpermissiontemplates', { type: 'refresh', permissiontemplateid: args.data.permissiontemplateid });
     }
 
     // Refresh when these events occur...
     $('#divEvents').on
         (
-        'listproducttemplates',
+        'listpermissiontemplates',
         function (ev, args) 
         {
             $('#divPermissionTemplatesTG').treegrid('reload');
 
-            doExpandTreeToId('divPermissionTemplatesTG', args.pdata.producttemplateid);
+            doExpandTreeToId('divPermissionTemplatesTG', args.pdata.permissiontemplateid);
         }
         );
 
     $('#divEvents').on('newproducttemplate', doSaved);
-    $('#divEvents').on('saveproducttemplate', doSaved);
-    $('#divEvents').on('changeproducttemplateparent', doSaved);
-    $('#divEvents').on('duplicateproducttemplate', doSaved);
-    $('#divEvents').on('expireproducttemplate', doSaved);
-    $('#divEvents').on('producttemplatesynced', doSaved);
-    $('#divEvents').on('newproducttemplatedetail', doSaved);
-    $('#divEvents').on('saveproducttemplatedetail', doSaved);
-    $('#divEvents').on('expireproducttemplatedetail', doSaved);
-    $('#divEvents').on('producttemplatedetailcreated', doSaved);
-    $('#divEvents').on('producttemplatedetailsaved', doSaved);
-    $('#divEvents').on('producttemplatedetailexpired', doSaved);
-    $('#divEvents').on('productupdated', doSaved);
+    // $('#divEvents').on('saveproducttemplate', doSaved);
+    // $('#divEvents').on('changeproducttemplateparent', doSaved);
+    // $('#divEvents').on('duplicateproducttemplate', doSaved);
+    // $('#divEvents').on('expireproducttemplate', doSaved);
+    // $('#divEvents').on('producttemplatesynced', doSaved);
+    // $('#divEvents').on('newproducttemplatedetail', doSaved);
+    // $('#divEvents').on('saveproducttemplatedetail', doSaved);
+    // $('#divEvents').on('expireproducttemplatedetail', doSaved);
+    // $('#divEvents').on('producttemplatedetailcreated', doSaved);
+    // $('#divEvents').on('producttemplatedetailsaved', doSaved);
+    // $('#divEvents').on('producttemplatedetailexpired', doSaved);
+    // $('#divEvents').on('productupdated', doSaved);
 
     $('#divEvents').on
         (
@@ -214,8 +211,8 @@ function doPermissionTemplatesTabWidgets()
                 doSave();
             else if (args == 'remove')
                 doRemove();
-            else if (args == 'removeparent')
-                doRemoveParent();
+            // else if (args == 'removeparent')
+            //     doRemoveParent();
             else if (args == 'duplicate')
                 doDuplicate();
             else if (args == 'details')
@@ -242,31 +239,22 @@ function doPermissionTemplatesTabWidgets()
             multiSort: true,
             loader: function (param, success, error) 
             {
-                success({ total: cache_producttemplates.length, rows: cache_producttemplates });
+                success({ total: cashe_permissiontemplates.length, rows: cashe_permissiontemplates });
                 //$('#divPermissionTemplatesTG').treegrid('collapseAll');
-
+                console.log(cashe_permissiontemplates.length);
                 doFooter();
             },
-            // frozenColumns:
-            //     [
-            //         [
-            //             // { title: 'Code', field: 'code', width: 200, align: 'left', resizable: true, editor: 'text', sortable: true },
-            //                 { title: 'Name', field: 'name', width: 500, align: 'left', resizable: true, editor: 'text', sortable: true }
-            //         ]
-            //     ],
+            frozenColumns:
+                [
+                    [
+                        // { title: 'Code', field: 'code', width: 200, align: 'left', resizable: true, editor: 'text', sortable: true },
+                            { title: 'Id', field: 'name', width: 100, align: 'left', resizable: true, editor: 'text', sortable: true }
+                    ]
+                ],
             columns:
                 [
                     [
                         { title: 'Name', field: 'name', width: 500, align: 'left', resizable: true, editor: 'text', sortable: true },
-                        // { title: 'Client', field: 'clientid', width: 200, align: 'left', resizable: true, editor: { type: 'combobox', options: { valueField: 'id', textField: 'name', data: cache_clients, onSelect: function (record) {/*console.log(record);*/ } } }, formatter: function (value, row) { return doGetStringFromIdInObjArray(cache_clients, value); } },
-                        // { title: 'Tax Code', field: 'taxcodeid', width: 200, align: 'left', resizable: true, editor: { type: 'combobox', options: { valueField: 'id', textField: 'name', data: cache_taxcodes, onSelect: function (record) {/*console.log(record);*/ } } }, formatter: function (value, row) { return doGetStringFromIdInObjArray(cache_taxcodes, value); } },
-                        // { title: 'RRP', field: 'price', width: 150, align: 'right', resizable: true, editor: { type: 'numberbox', options: { groupSeparator: ',', precision: 2 } }, formatter: function (value, row, index) { return _.niceformatnumber(value); } },
-                        // { title: 'Qty', field: 'qty', width: 150, align: 'right', resizable: true, editor: { type: 'numberbox', options: { groupSeparator: ',', precision: 0 } }, formatter: function (value, row, index) { return _.niceformatqty(value); } },
-                        // { title: 'Total Cost', field: 'totalprice', width: 150, align: 'right', resizable: true, formatter: function (value, row, index) { return _.niceformatnumber(value); } },
-                        // { title: '#Products', field: 'numproducts', width: 150, align: 'right', resizable: true },
-                        // { title: 'Unit Cost', field: 'unitcost', width: 150, align: 'right', resizable: true, formatter: function (value, row, index) { return doCalcUnitCost(value, row, index); } },
-                        // { title: 'Modified', field: 'date', width: 150, align: 'right', resizable: true, sortable: true },
-                        // { title: 'By', field: 'by', width: 200, align: 'left', resizable: true, sortable: true }
                     ]
                 ],
             onContextMenu: function (e, row) 
@@ -294,37 +282,37 @@ function doPermissionTemplatesTabWidgets()
              {
                 return true;
             },
-            onDrop: function (target, source, point) 
-            {
-                var t = _.isUN(target) ? null : target.id;
+            // onDrop: function (target, source, point) 
+            // {
+            //     var t = _.isUN(target) ? null : target.id;
 
-                doServerDataMessage('changeproducttemplateparent', { producttemplateid: source.id, parentid: t }, { type: 'refresh' });
-            },
-            onDblClickCell: function (field, row) 
-            {
-                doTreeGridStartEdit
-                    (
-                    'divPermissionTemplatesTG',
-                    editingId,
-                    function (row, id) 
-                    {
-                        editingId = id;
+            //     doServerDataMessage('changeproducttemplateparent', { producttemplateid: source.id, parentid: t }, { type: 'refresh' });
+            // },
+            // onDblClickCell: function (field, row) 
+            // {
+            //     doTreeGridStartEdit
+            //         (
+            //         'divPermissionTemplatesTG',
+            //         editingId,
+            //         function (row, id) 
+            //         {
+            //             editingId = id;
 
-                        if (['numproducts', 'modified', 'by'].indexOf(field) != -1)
-                            field = 'name';
+            //             if (['numproducts', 'modified', 'by'].indexOf(field) != -1)
+            //                 field = 'name';
 
-                        doTreeGridGetEditor
-                            (
-                            'divPermissionTemplatesTG',
-                            editingId,
-                            field,
-                            function (ed) 
-                            {
-                            }
-                            );
-                    }
-                    );
-            }
+            //             doTreeGridGetEditor
+            //                 (
+            //                 'divPermissionTemplatesTG',
+            //                 editingId,
+            //                 field,
+            //                 function (ed) 
+            //                 {
+            //                 }
+            //                 );
+            //         }
+            //         );
+            // }
         }
         );
 }

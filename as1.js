@@ -134,6 +134,7 @@ global.text_unablenewproductprice = "Unable to add new product price...";
 global.text_unablenewproductcategory = "Unable to add new product category...";
 global.text_unablenewproducttemplate = "Unable to add new product template...";
 global.text_unablenewproducttemplatedetail = "Unable to add new product to template...";
+global.text_unablenewpermissiontemplatedetail = "Unable to add new user permission to template...";
 global.text_unablenewbuildtemplatedetail = "Unable to add new product to build template...";
 global.text_unablenewbuildttemplate = "Unable to add new build template...";
 global.text_unablenewbuildtemplatedetail = "Unable to add new product to build template...";
@@ -3081,6 +3082,7 @@ function main()
       addListener('emailhistory',                         'emailhistory',                         global.modmsg.EmailHistory,                            ['maxhistory']);
 
       // Permission requests
+      addListener('listpermissiontemplates',              'listpermissiontemplates',              global.modpermission.ListPermissionTemplates,          []);
       addListener('newpermissiontemplate',                'newpermissiontemplate',                global.modpermission.NewPermissionTemplate,            ['*name', 'canvieworders', 'cancreateorders', 'canviewinvoices', 'cancreateinvoices', 'canviewinventory', 'cancreateinventory', 'canviewpayroll', 'cancreatepayroll', 'canviewproducts', 'cancreateproducts', 'canviewclients', 'cancreateclients', 'canviewcodes', 'cancreatecodes', 'canviewusers', 'cancreateusers', 'canviewbuilds', 'cancreatebuilds', 'canviewtemplates', 'cancreatetemplates', 'canviewbanking', 'cancreatebanking', 'canviewpurchasing', 'cancreatepurchasing', 'canviewalerts', 'cancreatealerts', 'canviewdashboard','cancreatedashboard']);
 
       // *******************************************************************************************************************************************************************************************

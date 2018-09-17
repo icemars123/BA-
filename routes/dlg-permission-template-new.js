@@ -96,6 +96,9 @@ function doDlgPermissionTemplateNew(templateid)
         $('#dlgPermissionTemplates').dialog('close');
     }
 
+    function doReset() 
+    {}
+
     $('#divEvents').on('saveuserpermissions', doSaved);
 
     $('#dlgPermissionTemplates').dialog
@@ -144,47 +147,47 @@ function doDlgPermissionTemplateNew(templateid)
                         loader: function (param, success, error) {
                             cache_userpermissions = [];
 
-                            cache_userpermissions.push(doMakeRowProperty('Can View', false, 'Orders'));
-                            cache_userpermissions.push(doMakeRowProperty('Can Create', false, 'Orders'));
+                            cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Orders'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Orders'));
 
-                            cache_userpermissions.push(doMakeRowProperty('Can View', false, 'Invoices'));
-                            cache_userpermissions.push(doMakeRowProperty('Can Create', false, 'Invoices'));
+                            cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Invoices'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Invoices'));
 
-                            cache_userpermissions.push(doMakeRowProperty('Can View', false, 'Inventory'));
-                            cache_userpermissions.push(doMakeRowProperty('Can Create', false, 'Inventory'));
+                            cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Inventory'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Inventory'));
 
-                            cache_userpermissions.push(doMakeRowProperty('Can View', false, 'Payroll'));
-                            cache_userpermissions.push(doMakeRowProperty('Can Create', false, 'Payroll'));
+                            cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Payroll'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Payroll'));
 
-                            cache_userpermissions.push(doMakeRowProperty('Can View', false, 'Products'));
-                            cache_userpermissions.push(doMakeRowProperty('Can Create', false, 'Products'));
+                            cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Products'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Products'));
 
-                            cache_userpermissions.push(doMakeRowProperty('Can View', false, 'Clients'));
-                            cache_userpermissions.push(doMakeRowProperty('Can Create', false, 'Clients'));
+                            cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Clients'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Clients'));
 
-                            cache_userpermissions.push(doMakeRowProperty('Can View', false, 'Codes'));
-                            cache_userpermissions.push(doMakeRowProperty('Can Create', false, 'Codes'));
+                            cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Codes'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Codes'));
 
-                            cache_userpermissions.push(doMakeRowProperty('Can View', false, 'Users'));
-                            cache_userpermissions.push(doMakeRowProperty('Can Create', false, 'Users'));
+                            cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Users'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Users'));
 
-                            cache_userpermissions.push(doMakeRowProperty('Can View', false, 'Builds'));
-                            cache_userpermissions.push(doMakeRowProperty('Can Create', false, 'Builds'));
+                            cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Builds'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Builds'));
 
-                            cache_userpermissions.push(doMakeRowProperty('Can View', false, 'Templates'));
-                            cache_userpermissions.push(doMakeRowProperty('Can Create', false, 'Templates'));
+                            cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Templates'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Templates'));
 
-                            cache_userpermissions.push(doMakeRowProperty('Can View', false, 'Banking'));
-                            cache_userpermissions.push(doMakeRowProperty('Can Create', false, 'Banking'));
+                            cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Banking'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Banking'));
 
-                            cache_userpermissions.push(doMakeRowProperty('Can View', false, 'Purchasing'));
-                            cache_userpermissions.push(doMakeRowProperty('Can Create', false, 'Purchasing'));
+                            cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Purchasing'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Purchasing'));
 
-                            cache_userpermissions.push(doMakeRowProperty('Can View', false, 'Alerts'));
-                            cache_userpermissions.push(doMakeRowProperty('Can Create', false, 'Alerts'));
+                            cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Alerts'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Alerts'));
 
-                            cache_userpermissions.push(doMakeRowProperty('Can View', false, 'Dashboard'));
-                            cache_userpermissions.push(doMakeRowProperty('Can Create', false, 'Dashboard'));
+                            cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Dashboard'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Dashboard'));
 
                             success({ total: cache_userpermissions.length, rows: cache_userpermissions });
                         },
@@ -309,18 +312,21 @@ function doDlgPermissionTemplateNew(templateid)
                         }
                     },
                     {
+                        text: 'Reset',
+                        handler: function () 
+                        {
+                            doReset();
+                        }
+                    },
+                    {
                         text: 'Close',
-                        handler: function () {
+                        handler: function () 
+                        {
                             $('#dlgPermissionTemplates').dialog('close');
                         }
                     }
                 ]
         }
         ).dialog('center').dialog('open');
-
-
-
-
-
 
 }
