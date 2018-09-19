@@ -1710,6 +1710,9 @@ function doPrimus()
 
     // Permission template requests
     doAddPrimusListener('newpermissiontemplate');
+    doAddPrimusListener('savepermissiontemplate');
+    doAddPrimusListener('loadpermissiontemplate');
+
 
     doAddPrimusListener
     (
@@ -1718,8 +1721,8 @@ function doPrimus()
         doUpdateInitTasksProgress();
 
         if (!_.isUN(data.rs)) {
-          cache_permisstiontemplates = [];
-
+          cache_permissiontemplates = [];
+          
           data.rs.forEach
             (
             function (p) {
@@ -1727,6 +1730,8 @@ function doPrimus()
               {
                 id: doNiceId(p.id),
                 name: doNiceString(p.name),
+                // parentid: doNiceId(c.parentid),
+                // parentname: doNiceString(c.parentname),
                 // numproducts: (p.numproducts == 0) ? '' : p.numproducts,
                 // date: doNiceDateModifiedOrCreated(p.datemodified, p.datecreated),
                 // by: doNiceModifiedBy(p.datemodified, p.usermodified, p.usercreated)
@@ -1741,6 +1746,7 @@ function doPrimus()
               //   if (!_.isUN(parent))
               //     parent.children.push(node);
               // }
+              cache_permissiontemplates.push(node);
             }
             );
 
@@ -2195,7 +2201,7 @@ function doPrimus()
 
     // Permission template events
     doAddPrimusListenerEmitter('permissiontemplatecreated', 'listpermissiontemplates');
-
+    doAddPrimusListenerEmitter('permissiontemplatesaved', 'listpermissiontemplates');
 
 
     // Product template events

@@ -49,9 +49,7 @@ function doDlgUserPermissions(user)
     doServerDataMessage('saveuserpermissions', {useruuid: user.uuid, permissions: permissions}, {type: 'refresh'});
   }
 
-  function doChooseSale() {
-    
-  }
+  
 
   function doMakeRowProperty(name, value, group)
   {

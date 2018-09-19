@@ -23,7 +23,7 @@ function doPermissionTemplatesTabWidgets()
 
     function doNew() 
     {
-        doDlgPermissionTemplateNew(null);
+        doDlgPermissionTemplateNew(null, null);
     }
 
     function doClear() 
@@ -118,20 +118,20 @@ function doPermissionTemplatesTabWidgets()
             );
     }
 
-    function doDetails() 
-    {
-        if (!doTreeGridGetSelectedRowData
-           (
-            'divPermissionTemplatesTG',
-            function (row) 
-            {
-                doDlgTemplateDetails(row);
-            }
-            )) 
-        {
-            doShowError('Please select a template to view/edit details');
-        }
-    }
+    // function doDetails() 
+    // {
+    //     if (!doTreeGridGetSelectedRowData
+    //        (
+    //         'divPermissionTemplatesTG',
+    //         function (row) 
+    //         {
+    //             doDlgTemplateDetails(row);
+    //         }
+    //         )) 
+    //     {
+    //         doShowError('Please select a template to view/edit details');
+    //     }
+    // }
 
     // function doRemoveParent() 
     // {
@@ -158,7 +158,7 @@ function doPermissionTemplatesTabWidgets()
 
     function doFooter() 
     {
-        $('#divPermissionTemplatesTG').treegrid('reloadFooter', [{ code: '<span class="totals_footer">' + doGetCountTreeArray(cashe_permissiontemplates) + ' Templates</span>' }]);
+        $('#divPermissionTemplatesTG').treegrid('reloadFooter', [{ name: '<span class="totals_footer">' + doGetCountTreeArray(cache_permissiontemplates) + ' Templates</span>' }]);
     }
 
     function doSaved(ev, args) 
@@ -174,11 +174,13 @@ function doPermissionTemplatesTabWidgets()
         {
             $('#divPermissionTemplatesTG').treegrid('reload');
 
+            console.log(args.pdata.permissiontemplateid);
+
             doExpandTreeToId('divPermissionTemplatesTG', args.pdata.permissiontemplateid);
         }
         );
 
-    $('#divEvents').on('newproducttemplate', doSaved);
+    $('#divEvents').on('newpermissiontemplate', doSaved);
     // $('#divEvents').on('saveproducttemplate', doSaved);
     // $('#divEvents').on('changeproducttemplateparent', doSaved);
     // $('#divEvents').on('duplicateproducttemplate', doSaved);
@@ -215,8 +217,8 @@ function doPermissionTemplatesTabWidgets()
             //     doRemoveParent();
             else if (args == 'duplicate')
                 doDuplicate();
-            else if (args == 'details')
-                doDetails();
+            // else if (args == 'details')
+            //     doDetails();
         }
         );
 
@@ -224,7 +226,7 @@ function doPermissionTemplatesTabWidgets()
         (
         {
             idField: 'id',
-            treeField: 'code',
+            treeField: 'name',
             lines: true,
             collapsible: true,
             fitColumns: false,
@@ -233,29 +235,31 @@ function doPermissionTemplatesTabWidgets()
             striped: true,
             toolbar: '#tbPermissionTemplates',
             showFooter: true,
-            sortName: 'code',
+            sortName: 'name',
             sortOrder: 'asc',
             remoteSort: false,
             multiSort: true,
             loader: function (param, success, error) 
             {
-                success({ total: cashe_permissiontemplates.length, rows: cashe_permissiontemplates });
+                success({ total: cache_permissiontemplates.length, rows: cache_permissiontemplates });
                 //$('#divPermissionTemplatesTG').treegrid('collapseAll');
-                console.log(cashe_permissiontemplates.length);
+                console.log('Cache_permissiontemplates: ' + cache_permissiontemplates.length);
                 doFooter();
             },
             frozenColumns:
                 [
                     [
-                        // { title: 'Code', field: 'code', width: 200, align: 'left', resizable: true, editor: 'text', sortable: true },
-                            { title: 'Id', field: 'name', width: 100, align: 'left', resizable: true, editor: 'text', sortable: true }
+                    //     // { title: 'Code', field: 'code', width: 200, align: 'left', resizable: true, editor: 'text', sortable: true },
+                    //         // { title: 'Id', field: 'name', width: 100, align: 'left', resizable: true, editor: 'text', sortable: true },
+                        { title: 'Name', field: 'name', width: '100%', align: 'left', resizable: true, editor: 'text', sortable: true }
                     ]
                 ],
             columns:
                 [
-                    [
-                        { title: 'Name', field: 'name', width: 500, align: 'left', resizable: true, editor: 'text', sortable: true },
-                    ]
+                    // [
+                    //     // { title: 'Id', field: 'id', width: 0, align: 'left', resizable: true, editor: 'text', sortable: true },
+                    //     { title: 'Name', field: 'name', width: '100%', align: 'left', resizable: true, editor: 'text', sortable: true },
+                    // ]
                 ],
             onContextMenu: function (e, row) 
             {
@@ -288,31 +292,33 @@ function doPermissionTemplatesTabWidgets()
 
             //     doServerDataMessage('changeproducttemplateparent', { producttemplateid: source.id, parentid: t }, { type: 'refresh' });
             // },
-            // onDblClickCell: function (field, row) 
-            // {
-            //     doTreeGridStartEdit
-            //         (
-            //         'divPermissionTemplatesTG',
-            //         editingId,
-            //         function (row, id) 
-            //         {
-            //             editingId = id;
+            onDblClickCell: function (field, row) 
+            {
+                doDlgPermissionTemplateNew(null, row.id);
+                console.log('id: ' + row.id);
+                // doTreeGridStartEdit
+                //     (
+                //     'divPermissionTemplatesTG',
+                //     editingId,
+                //     function (row, id) 
+                //     {
+                //         editingId = id;
 
-            //             if (['numproducts', 'modified', 'by'].indexOf(field) != -1)
-            //                 field = 'name';
+                //         if (['numproducts', 'modified', 'by'].indexOf(field) != -1)
+                //             field = 'name';
 
-            //             doTreeGridGetEditor
-            //                 (
-            //                 'divPermissionTemplatesTG',
-            //                 editingId,
-            //                 field,
-            //                 function (ed) 
-            //                 {
-            //                 }
-            //                 );
-            //         }
-            //         );
-            // }
+                //         doTreeGridGetEditor
+                //             (
+                //             'divPermissionTemplatesTG',
+                //             editingId,
+                //             field,
+                //             function (ed) 
+                //             {
+                //             }
+                //             );
+                //     }
+                //     );
+            }
         }
         );
 }

@@ -355,7 +355,8 @@ var cache_timesheets = [];
 // Cached lists for dialogs...
 var cache_productsbycategory = [];
 var cache_suppliernotes = [];
-var cache_permissionTemplateNames = []
+var cache_permissionTemplateNames = [];
+var cache_permissiontemplates = [];
 var cache_userpermissions = [];
 var cache_orderproducts = [];
 var cache_printtemplates = [];

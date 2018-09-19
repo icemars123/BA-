@@ -175,6 +175,8 @@ global.text_noordertemplate = "Unable to find an order template...";
 global.text_noinvoicetemplate = "Unable to find an invoice template...";
 global.text_noprinttemplate = "Unable to find system print template...";
 global.text_nodeliverydockettemplate = "Unable to find a delivery docket template...";
+global.text_unablesavepermissiontemplate = "Unable to save permission template...";
+
 
 //global.text_newcode = 'NEWCODE';
 global.text_newcode = '';
@@ -218,6 +220,7 @@ global.errcode_invaliduser = -28;
 global.errcode_unableoarseuser = -29;
 global.errcode_unablegetcommitstatuscode = -30;
 global.errcode_unablegetcustconfig = -31;
+global.errcode_unablesavepermissiontemplate = -32;
 
 // *******************************************************************************************************************************************************************************************
 // iTypes...
@@ -2257,6 +2260,7 @@ function main()
       poshtml = poshtml.replace(/XXX_ERRCODE_UNABLESAVECLIENT/g, global.config.errorcodes.errcode_unablesaveclient);
       poshtml = poshtml.replace(/XXX_ERRCODE_UNABLESAVEPRODUCT/g, global.config.errorcodes.errcode_unablesaveproduct);
       poshtml = poshtml.replace(/XXX_ERRCODE_INSUFFICIENTQTY/g, global.config.errorcodes.errcode_insufficientqty);
+      poshtml = poshtml.replace(/XXX_ERRCODE_UNABLESAVEPERMISSIONTEMPLATE/g, global.config.errorcodes.errcode_unablesavepermissiontemplate);
 
       poshtml = poshtml.replace(/XXX_BARCODE_FORMAT/g, global.config.barcodes.format);
       poshtml = poshtml.replace(/XXX_BARCODE_LENGTH/g, global.config.barcodes.length);
@@ -3084,6 +3088,8 @@ function main()
       // Permission requests
       addListener('listpermissiontemplates',              'listpermissiontemplates',              global.modpermission.ListPermissionTemplates,          []);
       addListener('newpermissiontemplate',                'newpermissiontemplate',                global.modpermission.NewPermissionTemplate,            ['*name', 'canvieworders', 'cancreateorders', 'canviewinvoices', 'cancreateinvoices', 'canviewinventory', 'cancreateinventory', 'canviewpayroll', 'cancreatepayroll', 'canviewproducts', 'cancreateproducts', 'canviewclients', 'cancreateclients', 'canviewcodes', 'cancreatecodes', 'canviewusers', 'cancreateusers', 'canviewbuilds', 'cancreatebuilds', 'canviewtemplates', 'cancreatetemplates', 'canviewbanking', 'cancreatebanking', 'canviewpurchasing', 'cancreatepurchasing', 'canviewalerts', 'cancreatealerts', 'canviewdashboard','cancreatedashboard']);
+      addListener('savepermissiontemplate',               'savepermissiontemplate',               global.modpermission.SavePermissionTemplate,           ['*name', 'canvieworders', 'cancreateorders', 'canviewinvoices', 'cancreateinvoices', 'canviewinventory', 'cancreateinventory', 'canviewpayroll', 'cancreatepayroll', 'canviewproducts', 'cancreateproducts', 'canviewclients', 'cancreateclients', 'canviewcodes', 'cancreatecodes', 'canviewusers', 'cancreateusers', 'canviewbuilds', 'cancreatebuilds', 'canviewtemplates', 'cancreatetemplates', 'canviewbanking', 'cancreatebanking', 'canviewpurchasing', 'cancreatepurchasing', 'canviewalerts', 'cancreatealerts', 'canviewdashboard', 'cancreatedashboard']);
+      addListener('loadpermissiontemplate',               'loadpermissiontemplate',               global.modpermission.LoadPermissionTemplate,           ['*permissiontemplateid']);
 
       // *******************************************************************************************************************************************************************************************
       // MDM events...

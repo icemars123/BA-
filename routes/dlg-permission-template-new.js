@@ -1,21 +1,11 @@
 var selectedPermissionTemplateId = null;
 
-function doDlgPermissionTemplateNew(templateid) 
+function doDlgPermissionTemplateNew(parentid, templateid) 
 {
     var isnew = _.isUndefined(templateid) || _.isNull(templateid);
+    var permissiontemplate = {};
 
     console.log('gavin1');
-
-    var tb =
-        [
-            {
-                text: 'Save',
-                iconCls: 'icon-save',
-                handler: doSave
-            }
-        ];
-
-
 
     function doSave() {
         var rows = $('#divPermissionTemplatesPG').propertygrid('getRows');
@@ -54,8 +44,6 @@ function doDlgPermissionTemplateNew(templateid)
         doServerDataMessage('saveuserpermissions', { useruuid: user.uuid, permissions: permissions }, { type: 'refresh' });
     }
 
-
-
     function doMakeRowProperty(name, value, group) {
         var row =
         {
@@ -92,25 +80,151 @@ function doDlgPermissionTemplateNew(templateid)
         return row;
     }
 
-    function doSaved(ev, args) {
+    function doSaved(ev, args) 
+    {
         $('#dlgPermissionTemplates').dialog('close');
     }
 
-    function doReset() 
-    {}
+    function doLoad(ev, args) 
+    {
+        permissiontemplate = (args.data.permissiontemplate);
+        doReset();
+    }
 
-    $('#divEvents').on('saveuserpermissions', doSaved);
+    function doReset() 
+    {
+        if (isnew) 
+        {
+            $('#divPermissionTemplatesPG1').propertygrid('clear');
+            $('#divPermissionTemplatesPG2').propertygrid('clear');
+        }
+        else
+        {
+            if (!_.isEmpty(permissiontemplate))
+            {
+                console.log(permissiontemplate.name);
+                // $('#divPermissionTemplatesPG1').propertygrid('setRows')[0].value = permissiontemplate.name;
+                // $('#divPermissionTemplatesPG2').propertygrid('setRows')[0].value = permissiontemplate.canvieworders;
+                $('#divPermissionTemplatesPG1').propertygrid
+                (
+                    {
+                        showGroup: true,
+                        scrollbarSize: 0,
+
+                        loader: function (param, success, error) {
+                            cache_permissionTemplateNames = [];
+
+                            cache_permissionTemplateNames.push(doCreateRowName('Name', permissiontemplate.name, 'Template'));
+                            success({ total: cache_permissionTemplateNames.length, rows: cache_permissionTemplateNames });
+                        },
+                        columns:
+                            [
+
+                                [
+                                    { field: 'name', title: 'Name', width: 70 },
+                                    {
+                                        field: 'value',
+                                        title: 'Value',
+                                        width: 100
+                                    }
+                                ]
+                            ]
+                    }
+
+                );
+
+                $('#divPermissionTemplatesPG2').propertygrid
+                (
+                    {
+                        showGroup: true,
+                        scrollbarSize: 0,
+
+                        loader: function (param, success, error) {
+                            cache_userpermissions = [];
+
+                            cache_userpermissions.push(doMakeRowProperty('Can View', permissiontemplate.canvieworders, 'Orders'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', permissiontemplate.cancreateorders, 'Orders'));
+
+                            cache_userpermissions.push(doMakeRowProperty('Can View', permissiontemplate.canviewinvoices, 'Invoices'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', permissiontemplate.cancreateinvoices, 'Invoices'));
+
+                            cache_userpermissions.push(doMakeRowProperty('Can View', permissiontemplate.canviewinventory, 'Inventory'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', permissiontemplate.cancreateinventory, 'Inventory'));
+
+                            cache_userpermissions.push(doMakeRowProperty('Can View', permissiontemplate.canviewpayroll, 'Payroll'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', permissiontemplate.cancreatepayroll, 'Payroll'));
+
+                            cache_userpermissions.push(doMakeRowProperty('Can View', permissiontemplate.canviewproducts, 'Products'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', permissiontemplate.cancreateproducts, 'Products'));
+
+                            cache_userpermissions.push(doMakeRowProperty('Can View', permissiontemplate.canviewclients, 'Clients'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', permissiontemplate.cancreateclients, 'Clients'));
+
+                            cache_userpermissions.push(doMakeRowProperty('Can View', permissiontemplate.canviewcodes, 'Codes'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', permissiontemplate.cancreatecodes, 'Codes'));
+
+                            cache_userpermissions.push(doMakeRowProperty('Can View', permissiontemplate.canviewusers, 'Users'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', permissiontemplate.cancreateusers, 'Users'));
+
+                            cache_userpermissions.push(doMakeRowProperty('Can View', permissiontemplate.canviewbuilds, 'Builds'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', permissiontemplate.cancreatebuilds, 'Builds'));
+
+                            cache_userpermissions.push(doMakeRowProperty('Can View', permissiontemplate.canviewtemplates, 'Templates'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', permissiontemplate.cancreatetemplates, 'Templates'));
+
+                            cache_userpermissions.push(doMakeRowProperty('Can View', permissiontemplate.canviewbanking, 'Banking'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', permissiontemplate.cancreatebanking, 'Banking'));
+
+                            cache_userpermissions.push(doMakeRowProperty('Can View', permissiontemplate.canviewpurchasing, 'Purchasing'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', permissiontemplate.cancreatepurchasing, 'Purchasing'));
+
+                            cache_userpermissions.push(doMakeRowProperty('Can View', permissiontemplate.canviewalerts, 'Alerts'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', permissiontemplate.cancreatealerts, 'Alerts'));
+
+                            cache_userpermissions.push(doMakeRowProperty('Can View', permissiontemplate.canviewdashboard, 'Dashboard'));
+                            cache_userpermissions.push(doMakeRowProperty('Can Create', permissiontemplate.cancreatedashboard, 'Dashboard'));
+
+                            success({ total: cache_userpermissions.length, rows: cache_userpermissions });
+                        },
+                        columns:
+                            [
+
+                                [
+                                    { field: 'name', title: 'Action', width: 70 },
+                                    {
+                                        field: 'value',
+                                        title: 'Permission',
+                                        width: 100,
+                                        formatter: function (value, row, index) {
+                                            return mapBoolToImage(value);
+                                        }
+                                    }
+                                ]
+                            ]
+                    }
+                );    
+            }
+        }
+    }
+
+    $('#divEvents').on('newpermissiontemplate', doSaved);
+    $('#divEvents').on('savepermissiontemplate', doSaved);
+    $('#divEvents').on('loadpermissiontemplate', doLoad);
 
     $('#dlgPermissionTemplates').dialog
         (
         {
             title: 'Create User Permission Template',
-            onClose: function () {
-                $('#divEvents').off('saveuserpermissions', doSaved);
+            onClose: function () 
+            {
+                $('#divEvents').off('newpermissiontemplate', doSaved);
+                $('#divEvents').off('savepermissiontemplate', doSaved);
+                $('#divEvents').off('loadpermissiontemplate', doLoad);
             },
-            onOpen: function () {
+            onOpen: function () 
+            {
                 $('#divPermissionTemplatesPG1').propertygrid
-                    (
+                (
                     {
                         showGroup: true,
                         scrollbarSize: 0,
@@ -135,14 +249,13 @@ function doDlgPermissionTemplateNew(templateid)
                             ]
                     }
 
-                    );
+                );
 
                 $('#divPermissionTemplatesPG2').propertygrid
-                    (
+                (
                     {
                         showGroup: true,
                         scrollbarSize: 0,
-                        // toolbar: tb,
 
                         loader: function (param, success, error) {
                             cache_userpermissions = [];
@@ -207,7 +320,20 @@ function doDlgPermissionTemplateNew(templateid)
                                 ]
                             ]
                     }
-                    );
+                );
+
+                if (isnew)
+                    $('#btnPermissionTemplateNewAdd').linkbutton({ text: 'Add' });
+                else
+                    $('#btnPermissionTemplateNewAdd').linkbutton({ text: 'Save' });
+
+                if (!_.isUndefined(templateid) && !_.isNull(templateid)) 
+                
+                    doServerDataMessage('loadpermissiontemplate', { permissiontemplateid: templateid }, { type: 'refresh' });
+                
+                else
+                    doReset();
+                    
             },
             buttons:
                 [
@@ -304,7 +430,56 @@ function doDlgPermissionTemplateNew(templateid)
                                 }
                                 else
                                 {
-                                    
+                                    doServerDataMessage
+                                    (
+                                        'savepermissiontemplate',
+                                        {
+                                            name: name,
+
+                                            canvieworders: canvieworders,
+                                            cancreateorders: cancreateorders,
+
+                                            canviewinvoices: canviewinvoices,
+                                            cancreateinvoices: cancreateinvoices,
+
+                                            canviewinventory: canviewinventory,
+                                            cancreateinventory: cancreateinventory,
+
+                                            canviewpayroll: canviewpayroll,
+                                            cancreatepayroll: cancreatepayroll,
+
+                                            canviewproducts: canviewproducts,
+                                            cancreateproducts: cancreateproducts,
+
+                                            canviewclients: canviewclients,
+                                            cancreateclients: cancreateclients,
+
+                                            canviewcodes: canviewcodes,
+                                            cancreatecodes: cancreatecodes,
+
+                                            canviewusers: canviewusers,
+                                            cancreateusers: cancreateusers,
+
+                                            canviewbuilds: canviewbuilds,
+                                            cancreatebuilds: cancreatebuilds,
+
+                                            canviewtemplates: canviewtemplates,
+                                            cancreatetemplates: cancreatetemplates,
+
+                                            canviewbanking: canviewbanking,
+                                            cancreatebanking: cancreatebanking,
+
+                                            canviewpurchasing: canviewpurchasing,
+                                            cancreatepurchasing: cancreatepurchasing,
+
+                                            canviewalerts: canviewalerts,
+                                            cancreatealerts: cancreatealerts,
+
+                                            canviewdashboard: canviewdashboard,
+                                            cancreatedashboard: cancreatedashboard
+                                        },
+                                        { type: 'refresh' }
+                                    );
                                 }
                             }
                             else
@@ -328,5 +503,4 @@ function doDlgPermissionTemplateNew(templateid)
                 ]
         }
         ).dialog('center').dialog('open');
-
 }
