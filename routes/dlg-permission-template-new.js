@@ -424,12 +424,9 @@ function doDlgPermissionTemplateNew(parentid, templateid)
                     $('#btnPermissionTemplateNewAdd').linkbutton({ text: 'Save' });
 
                 if (!_.isUndefined(templateid) && !_.isNull(templateid)) 
-                
                     doServerDataMessage('loadpermissiontemplate', { permissiontemplateid: templateid }, { type: 'refresh' });
-                
                 else
                     doReset();
-                    
             },
             buttons:
                 [
