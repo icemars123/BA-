@@ -95,8 +95,104 @@ function doDlgPermissionTemplateNew(parentid, templateid)
     {
         if (isnew) 
         {
-            $('#divPermissionTemplatesPG1').propertygrid('clear');
-            $('#divPermissionTemplatesPG2').propertygrid('clear');
+            $('#divPermissionTemplatesPG1').propertygrid
+                (
+                {
+                    showGroup: true,
+                    scrollbarSize: 0,
+
+                    loader: function (param, success, error) {
+                        cache_permissionTemplateNames = [];
+
+                        cache_permissionTemplateNames.push(doCreateRowName('Name', '', 'Template'));
+                        success({ total: cache_permissionTemplateNames.length, rows: cache_permissionTemplateNames });
+                    },
+                    columns:
+                        [
+
+                            [
+                                { field: 'name', title: 'Name', width: 70 },
+                                {
+                                    field: 'value',
+                                    title: 'Value',
+                                    width: 100
+                                }
+                            ]
+                        ]
+                }
+
+                );
+
+            $('#divPermissionTemplatesPG2').propertygrid
+                (
+                {
+                    showGroup: true,
+                    scrollbarSize: 0,
+
+                    loader: function (param, success, error) {
+                        cache_userpermissions = [];
+
+                        cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Orders'));
+                        cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Orders'));
+
+                        cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Invoices'));
+                        cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Invoices'));
+
+                        cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Inventory'));
+                        cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Inventory'));
+
+                        cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Payroll'));
+                        cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Payroll'));
+
+                        cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Products'));
+                        cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Products'));
+
+                        cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Clients'));
+                        cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Clients'));
+
+                        cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Codes'));
+                        cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Codes'));
+
+                        cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Users'));
+                        cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Users'));
+
+                        cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Builds'));
+                        cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Builds'));
+
+                        cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Templates'));
+                        cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Templates'));
+
+                        cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Banking'));
+                        cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Banking'));
+
+                        cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Purchasing'));
+                        cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Purchasing'));
+
+                        cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Alerts'));
+                        cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Alerts'));
+
+                        cache_userpermissions.push(doMakeRowProperty('Can View', 0, 'Dashboard'));
+                        cache_userpermissions.push(doMakeRowProperty('Can Create', 0, 'Dashboard'));
+
+                        success({ total: cache_userpermissions.length, rows: cache_userpermissions });
+                    },
+                    columns:
+                        [
+
+                            [
+                                { field: 'name', title: 'Action', width: 70 },
+                                {
+                                    field: 'value',
+                                    title: 'Permission',
+                                    width: 100,
+                                    formatter: function (value, row, index) {
+                                        return mapBoolToImage(value);
+                                    }
+                                }
+                            ]
+                        ]
+                }
+                );   
         }
         else
         {
