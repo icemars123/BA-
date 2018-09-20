@@ -59,33 +59,33 @@ function doPermissionTemplatesTabWidgets()
         editingId = doTreeGridCancelEdit('divPermissionTemplatesTG', editingId);
     }
 
-    function doSave() 
-    {
-        doTreeGridEndEditGetRow
-            (
-            'divPermissionTemplatesTG',
-            editingId,
-            function (row) 
-            {
-                doServerDataMessage
-                    (
-                    'saveproducttemplate',
-                    {
-                        producttemplateid: row.id,
-                        name: row.name,
-                        code: row.code,
-                        clientid: row.clientid,
-                        taxcodeid: row.taxcodeid,
-                        price: row.price,
-                        qty: row.qty
-                    },
-                    { type: 'refresh' }
-                    );
-            }
-            );
+    // function doSave() 
+    // {
+    //     doTreeGridEndEditGetRow
+    //         (
+    //         'divPermissionTemplatesTG',
+    //         editingId,
+    //         function (row) 
+    //         {
+    //             doServerDataMessage
+    //                 (
+    //                 'saveproducttemplate',
+    //                 {
+    //                     producttemplateid: row.id,
+    //                     name: row.name,
+    //                     code: row.code,
+    //                     clientid: row.clientid,
+    //                     taxcodeid: row.taxcodeid,
+    //                     price: row.price,
+    //                     qty: row.qty
+    //                 },
+    //                 { type: 'refresh' }
+    //                 );
+    //         }
+    //         );
 
-        editingId = null;
-    }
+    //     editingId = null;
+    // }
 
     function doRemove() 
     {
@@ -181,6 +181,10 @@ function doPermissionTemplatesTabWidgets()
         );
 
     $('#divEvents').on('newpermissiontemplate', doSaved);
+    $('#divEvents').on('savepermissiontemplate', doSaved);
+    $('#divEvents').on('permissiontemplatesaved', doSaved);
+    $('#divEvents').on('permissiontemplatescreated', doSaved);   
+
     // $('#divEvents').on('saveproducttemplate', doSaved);
     // $('#divEvents').on('changeproducttemplateparent', doSaved);
     // $('#divEvents').on('duplicateproducttemplate', doSaved);
@@ -209,8 +213,8 @@ function doPermissionTemplatesTabWidgets()
                 doEdit();
             else if (args == 'cancel')
                 doCancel();
-            else if (args == 'save')
-                doSave();
+            // else if (args == 'save')
+            //     doSave();
             else if (args == 'remove')
                 doRemove();
             // else if (args == 'removeparent')

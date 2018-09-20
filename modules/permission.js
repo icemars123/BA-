@@ -173,10 +173,39 @@ function doSavePermissionTemplate(tx, world)
                     world.cancreatealerts,
 
                     world.canviewdashboard,
-                    world.cancreatedashboard
+                    world.cancreatedashboard,
 
-
+                    __.sanitiseAsBigInt(world.permissiontemplateid)
                 ],
+                function (err, result) 
+                {
+                    if (!err) 
+                    {
+                        tx.query
+                        (
+                            'select * from permissiontemplatedetails where id=$1',
+                            [
+                                __.sanitiseAsBigInt(world.permissiontemplateid)
+                            ],
+                            function (err, result) 
+                            {
+                                if (!err) 
+                                {
+                                    resolve
+                                    (
+                                        {
+                                            permissiontemplateid: result.rows[0].id
+                                        }
+                                    );
+                                } 
+                                else
+                                    reject(err); 
+                            }
+                        );
+                    } 
+                    else 
+                        reject(err);
+                }
             );
         }
     );

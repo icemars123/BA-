@@ -527,6 +527,8 @@ function doDlgPermissionTemplateNew(parentid, templateid)
                                     (
                                         'savepermissiontemplate',
                                         {
+                                            permissiontemplateid: templateid,
+
                                             name: name,
 
                                             canvieworders: canvieworders,
