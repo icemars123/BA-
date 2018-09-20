@@ -31,33 +31,12 @@ function doPermissionTemplatesTabWidgets()
         $('#divPermissionTemplatesTG').treegrid('unselectAll');
     }
 
-    function doEdit() 
-    {
-        doTreeGridStartEdit
-        (
-            'divPermissionTemplatesTG',
-            editingId,
-            function (row, id) 
-            {
-                editingId = id;
+    
 
-                doTreeGridGetEditor
-                    (
-                    'divPermissionTemplatesTG',
-                    editingId,
-                    'name',
-                    function (ed) 
-                    {
-                    }
-                    );
-            }
-        );
-    }
-
-    function doCancel() 
-    {
-        editingId = doTreeGridCancelEdit('divPermissionTemplatesTG', editingId);
-    }
+    // function doCancel() 
+    // {
+    //     editingId = doTreeGridCancelEdit('divPermissionTemplatesTG', editingId);
+    // }
 
     // function doSave() 
     // {
@@ -89,21 +68,43 @@ function doPermissionTemplatesTabWidgets()
 
     function doRemove() 
     {
-        var row = $('#divPermissionTemplatesTG').treegrid('getSelected');
-        if (row) 
+        var row = $('#divPermissionTemplatesTG').datagrid('getSelected');
+
+        if (rows.length == 0)
+            doShowError('Please select one or more permission template to remove');
+        else if (rows.length == 1) 
         {
+            var row = rows[0];
             doPromptYesNoCancel
-                (
-                'Remove ' + row.name + ' and ALL subtemplates (Yes) or ONLY this template (No)?',
+            (
+                'Remove ' + row.name + ' and ALL sub permission templates (Yes) or ONLY this client (No)?',
                 function (result) 
                 {
                     if (!_.isNull(result))
-                        doServerDataMessage('expireproducttemplate', { producttemplateid: row.id, cascade: result }, { type: 'refresh' });
+                        doServerDataMessage('expirepermissiontemplate', { permissiontemplateid: row.id, cascade: result }, { type: 'refresh' });
                 }
-                );
+            );
         }
-        else
-            doShowError('Please select an template to remove');
+        else 
+        {
+            doPromptOkCancel
+            (
+                'Remove ' + rows.length + ' permission templates and ALL their sub permission templates?',
+                function (result) 
+                {
+                    if (!_.isNull(result)) 
+                    {
+                        rows.forEach
+                        (
+                            function (row) 
+                            {
+                                doServerDataMessage('expirepermissiontemplate', { permissiontemplateid: row.id, cascade: result }, { type: 'refresh' });
+                            }
+                        );
+                    }
+                }
+            );
+        }
     }
 
     function doDuplicate() 
@@ -118,20 +119,6 @@ function doPermissionTemplatesTabWidgets()
             );
     }
 
-    // function doDetails() 
-    // {
-    //     if (!doTreeGridGetSelectedRowData
-    //        (
-    //         'divPermissionTemplatesTG',
-    //         function (row) 
-    //         {
-    //             doDlgTemplateDetails(row);
-    //         }
-    //         )) 
-    //     {
-    //         doShowError('Please select a template to view/edit details');
-    //     }
-    // }
 
     // function doRemoveParent() 
     // {
@@ -182,8 +169,10 @@ function doPermissionTemplatesTabWidgets()
 
     $('#divEvents').on('newpermissiontemplate', doSaved);
     $('#divEvents').on('savepermissiontemplate', doSaved);
+    $('#divEvents').on('expirepermissiontemplate', doSaved);
     $('#divEvents').on('permissiontemplatesaved', doSaved);
-    $('#divEvents').on('permissiontemplatescreated', doSaved);   
+    $('#divEvents').on('permissiontemplatescreated', doSaved);
+    $('#divEvents').on('permissiontemplateexpired', doSaved);   
 
     // $('#divEvents').on('saveproducttemplate', doSaved);
     // $('#divEvents').on('changeproducttemplateparent', doSaved);
@@ -209,10 +198,8 @@ function doPermissionTemplatesTabWidgets()
                 doNew();
             else if (args == 'clear')
                 doClear();
-            else if (args == 'edit')
-                doEdit();
-            else if (args == 'cancel')
-                doCancel();
+            // else if (args == 'cancel')
+            //     doCancel();
             // else if (args == 'save')
             //     doSave();
             else if (args == 'remove')

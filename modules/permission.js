@@ -8,7 +8,7 @@ function doNewPermissionTemplate(tx, world)
         {
             tx.query
             (
-                'insert into permissiontemplatedetails (name,canvieworders,cancreateorders,canviewinvoices,cancreateinvoices,canviewinventory,cancreateinventory,canviewpayroll,cancreatepayroll,canviewproducts,cancreateproducts,canviewclients,cancreateclients,canviewcodes,cancreatecodes,canviewusers,cancreateusers,canviewbuilds,cancreatebuilds,canviewtemplates,cancreatetemplates,canviewbanking,cancreatebanking,canviewpurchasing,cancreatepurchasing,canviewalerts,cancreatealerts,canviewdashboard,cancreatedashboard) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29) returning id', 
+                'insert into permissiontemplatedetails (name,canvieworders,cancreateorders,canviewinvoices,cancreateinvoices,canviewinventory,cancreateinventory,canviewpayroll,cancreatepayroll,canviewproducts,cancreateproducts,canviewclients,cancreateclients,canviewcodes,cancreatecodes,canviewusers,cancreateusers,canviewbuilds,cancreatebuilds,canviewtemplates,cancreatetemplates,canviewbanking,cancreatebanking,canviewpurchasing,cancreatepurchasing,canviewalerts,cancreatealerts,canviewdashboard,cancreatedashboard,userscreated_id,customers_id) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31) returning id', 
                 [
                     __.sanitiseAsString(world.name, 50),
 
@@ -52,7 +52,10 @@ function doNewPermissionTemplate(tx, world)
                     world.cancreatealerts,
 
                     world.canviewdashboard,
-                    world.cancreatedashboard
+                    world.cancreatedashboard,
+
+                    world.cn.userid,
+                    world.cn.custid
                 ],
                 function (err, result) 
                 {
@@ -62,8 +65,9 @@ function doNewPermissionTemplate(tx, world)
 
                         tx.query
                         (
-                            'select * from permissiontemplatedetails where id = $1',
+                            'select p1.datecreated,u1.name usercreated from permissiontemplatedetails p1 left join users u1 on (p1.userscreated_id=u1.id) where p1.customers_id=$1 and p1.id=$2',
                             [
+                                world.cn.custid,
                                 __.sanitiseAsBigInt(permissiontemplateid)
                             ],
                             function (err, result) 
@@ -72,7 +76,14 @@ function doNewPermissionTemplate(tx, world)
                                 {
                                     var pc = result.rows[0];
 
-                                    resolve({permissiontemplateid: permissiontemplateid })
+                                    resolve
+                                    (
+                                        {
+                                            permissiontemplateid: permissiontemplateid,
+                                            datecreated: global.moment(pc.datecreated).format('YYYY-MM-DD HH:mm:ss'),
+                                            usercreated: pc.usercreated 
+                                        }
+                                    )
                                 } 
                                 else 
                                     reject({ message: global.text_unablenewpermissiontemplatedetail });
@@ -212,6 +223,41 @@ function doSavePermissionTemplate(tx, world)
     return promise;
 }
 
+function doExpirePermissionTemplateStep1(tx, world) 
+{
+    var promise = new global.rsvp.Promise
+    (
+        function (resolve, reject) 
+        {
+            if (!world.cascade) 
+            {
+                tx.query
+                (
+                    'select id from permissiontemplatedetails where '
+                );
+            } 
+            else 
+                resolve({permissiontemplateid: world.permissiontemplateid});
+        }
+    );
+    return promise;
+}
+
+function doExpirePermissionTemplateStep2(tx, world) 
+{
+    var promise = new global.rsvp.Promise
+    (
+        function (resolve, reject) 
+        {
+            tx.query
+            (
+
+            );
+        }
+    );
+    return promise;
+}
+
 
 
 
@@ -338,8 +384,8 @@ function NewPermissionTemplate(world)
                                                         rc: global.errcode_none,
                                                         msg: global.text_success,
                                                         permissiontemplateid: result.permissiontemplateid,
-                                                        // datecreated: result.datecreated,
-                                                        // usercreated: result.usercreated,
+                                                        datecreated: result.datecreated,
+                                                        usercreated: result.usercreated,
                                                         pdata: world.pdata
                                                     }
                                                 );
@@ -349,8 +395,8 @@ function NewPermissionTemplate(world)
                                                     'permissiontemplatecreated',
                                                     {
                                                         permissiontemplateid: result.permissiontemplateid,
-                                                        // datecreated: result.datecreated,
-                                                        // usercreated: result.usercreated
+                                                        datecreated: result.datecreated,
+                                                        usercreated: result.usercreated
                                                     },
                                                     world.spark.id
                                                 );
@@ -595,6 +641,118 @@ function SavePermissionTemplate(world)
 
 }
 
+function ExpirePermissionTemplate(world) 
+{
+    var msg = '[' + world.eventname + '] ';
+    //
+    global.pg.connect
+    (
+        global.cs,
+        function (err, client, done) 
+        {
+            if (!err) 
+            {
+                var tx = new global.pgtx(client);
+                tx.begin
+                (
+                    function (err) 
+                    {
+                        if (!err) 
+                        {
+                            doExpirePermissionTemplateStep1(tx, world).then
+                            (
+                                function (ignore) 
+                                {
+                                    return doExpirePermissionTemplateStep2(tx, world);
+                                }
+                            ).then
+                            (
+                                function (result) 
+                                {
+                                    tx.commit
+                                    (
+                                        function (err) 
+                                        {
+                                            if (!err) 
+                                            {
+                                                done();
+                                                world.spark.emit
+                                                (
+                                                    world.eventname, 
+                                                    { 
+                                                        rc: global.errcode_none, 
+                                                        msg: global.text_success, 
+                                                        permissiontemplateid: result.permissiontemplateid,
+                                                        // dateexpired: result.dateexpired, 
+                                                        // userexpired: result.userexpired, 
+                                                        pdata: world.pdata 
+                                                    }
+                                                );
+                                                global.pr.sendToRoomExcept
+                                                (
+                                                    global.custchannelprefix + world.cn.custid, 
+                                                    'permissiontemplateexpired', 
+                                                    { 
+                                                        permissiontemplateid: result.permissiontemplateid,
+                                                        // dateexpired: result.dateexpired, 
+                                                        // userexpired: result.userexpired 
+                                                    }, 
+                                                    world.spark.id
+                                                );
+                                            }
+                                            else 
+                                            {
+                                                tx.rollback
+                                                (
+                                                    function (ignore) 
+                                                    {
+                                                        done();
+                                                        msg += global.text_tx + ' ' + err.message;
+                                                        global.log.error({ expirepermissiontemplate: true }, msg);
+                                                        world.spark.emit(global.eventerror, { rc: global.errcode_dberr, msg: msg, pdata: world.pdata });
+                                                    }
+                                                );
+                                            }
+                                        }
+                                    );
+                                }
+                            ).then
+                            (
+                                null,
+                                function (err) 
+                                {
+                                    tx.rollback
+                                    (
+                                        function (ignore) 
+                                        {
+                                            done();
+
+                                            msg += global.text_generalexception + ' ' + err.message;
+                                            global.log.error({ expirepermissiontemplate: true }, msg);
+                                            world.spark.emit(global.eventerror, { rc: global.errcode_fatal, msg: msg, pdata: world.pdata });
+                                        }
+                                    );
+                                }
+                            );
+                        } 
+                        else 
+                        {
+                            done();
+                            msg += global.text_notxstart + ' ' + err.message;
+                            global.log.error({ expirepermissiontemplate: true }, msg);
+                            world.spark.emit(global.eventerror, { rc: global.errcode_dberr, msg: msg, pdata: world.pdata });
+                        }
+                    }
+                );
+            }
+            else 
+            {
+                global.log.error({ expirepermissiontemplate: true }, global.text_nodbconnection);
+                world.spark.emit(global.eventerror, { rc: global.errcode_dbunavail, msg: global.text_nodbconnection, pdata: world.pdata });
+            }
+        }
+    );
+}
 
 
 
@@ -610,3 +768,4 @@ module.exports.LoadPermissionTemplate = LoadPermissionTemplate;
 module.exports.NewPermissionTemplate = NewPermissionTemplate;
 module.exports.ListPermissionTemplates = ListPermissionTemplates;
 module.exports.SavePermissionTemplate = SavePermissionTemplate;
+module.exports.ExpirePermissionTemplate = ExpirePermissionTemplate;

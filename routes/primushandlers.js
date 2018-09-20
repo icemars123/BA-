@@ -1712,6 +1712,7 @@ function doPrimus()
     doAddPrimusListener('newpermissiontemplate');
     doAddPrimusListener('savepermissiontemplate');
     doAddPrimusListener('loadpermissiontemplate');
+    doAddPrimusListener('expirepermissiontemplate');
 
 
     doAddPrimusListener
@@ -2202,6 +2203,9 @@ function doPrimus()
     // Permission template events
     doAddPrimusListenerEmitter('permissiontemplatecreated', 'listpermissiontemplates');
     doAddPrimusListenerEmitter('permissiontemplatesaved', 'listpermissiontemplates');
+    doAddPrimusListenerEmitter('permissiontemplateexpired', 'listpermissiontemplates');
+    doAddPrimusListenerEmitter('permissiontemplateduplicated', 'listpermissiontemplates');
+    // doAddPrimusListenerEmitter('producttemplateparentchanged', 'listpermissiontemplates');
 
 
     // Product template events

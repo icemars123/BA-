@@ -176,6 +176,7 @@ global.text_noinvoicetemplate = "Unable to find an invoice template...";
 global.text_noprinttemplate = "Unable to find system print template...";
 global.text_nodeliverydockettemplate = "Unable to find a delivery docket template...";
 global.text_unablesavepermissiontemplate = "Unable to save permission template...";
+global.text_unableexpirepermissiontemplate = "Unable to expire permission template...";
 
 
 //global.text_newcode = 'NEWCODE';
@@ -3090,7 +3091,8 @@ function main()
       addListener('newpermissiontemplate',                'newpermissiontemplate',                global.modpermission.NewPermissionTemplate,            ['*name', 'canvieworders', 'cancreateorders', 'canviewinvoices', 'cancreateinvoices', 'canviewinventory', 'cancreateinventory', 'canviewpayroll', 'cancreatepayroll', 'canviewproducts', 'cancreateproducts', 'canviewclients', 'cancreateclients', 'canviewcodes', 'cancreatecodes', 'canviewusers', 'cancreateusers', 'canviewbuilds', 'cancreatebuilds', 'canviewtemplates', 'cancreatetemplates', 'canviewbanking', 'cancreatebanking', 'canviewpurchasing', 'cancreatepurchasing', 'canviewalerts', 'cancreatealerts', 'canviewdashboard','cancreatedashboard']);
       addListener('savepermissiontemplate',               'savepermissiontemplate',               global.modpermission.SavePermissionTemplate,           ['*permissiontemplateid', '*name', 'canvieworders', 'cancreateorders', 'canviewinvoices', 'cancreateinvoices', 'canviewinventory', 'cancreateinventory', 'canviewpayroll', 'cancreatepayroll', 'canviewproducts', 'cancreateproducts', 'canviewclients', 'cancreateclients', 'canviewcodes', 'cancreatecodes', 'canviewusers', 'cancreateusers', 'canviewbuilds', 'cancreatebuilds', 'canviewtemplates', 'cancreatetemplates', 'canviewbanking', 'cancreatebanking', 'canviewpurchasing', 'cancreatepurchasing', 'canviewalerts', 'cancreatealerts', 'canviewdashboard', 'cancreatedashboard']);
       addListener('loadpermissiontemplate',               'loadpermissiontemplate',               global.modpermission.LoadPermissionTemplate,           ['*permissiontemplateid']);
-
+      addListener('expirepermissiontemplate',             'expirepermissiontemplate',             global.modpermission.ExpirePermissionTemplate,         ['*permissiontemplateid', '*cascade']);
+      
       // *******************************************************************************************************************************************************************************************
       // MDM events...
       spark.on
