@@ -68,43 +68,66 @@ function doPermissionTemplatesTabWidgets()
 
     function doRemove() 
     {
-        var row = $('#divPermissionTemplatesTG').datagrid('getSelected');
+        var row = $('#divPermissionTemplatesTG').treegrid('getSelected');
 
-        if (rows.length == 0)
-            doShowError('Please select one or more permission template to remove');
-        else if (rows.length == 1) 
+        if (row) 
         {
-            var row = rows[0];
             doPromptYesNoCancel
             (
-                'Remove ' + row.name + ' and ALL sub permission templates (Yes) or ONLY this client (No)?',
+                'Remove ' + row.name + ' and ALL sub permission templates (Yes) or ONLY this template (No)?',
                 function (result) 
                 {
                     if (!_.isNull(result))
-                        doServerDataMessage('expirepermissiontemplate', { permissiontemplateid: row.id, cascade: result }, { type: 'refresh' });
-                }
-            );
-        }
-        else 
-        {
-            doPromptOkCancel
-            (
-                'Remove ' + rows.length + ' permission templates and ALL their sub permission templates?',
-                function (result) 
-                {
-                    if (!_.isNull(result)) 
-                    {
-                        rows.forEach
+                        doServerDataMessage
                         (
-                            function (row) 
-                            {
-                                doServerDataMessage('expirepermissiontemplate', { permissiontemplateid: row.id, cascade: result }, { type: 'refresh' });
-                            }
+                            'expirepermissiontemplate', 
+                            { 
+                                permissiontemplateid: row.id, 
+                                cascade: result 
+                            }, 
+                            { type: 'refresh' }
                         );
-                    }
                 }
             );
         }
+        else
+            doShowError('Please select an template to remove');
+
+        // if (rows.length == 0)
+        //     doShowError('Please select one or more permission template to remove');
+        // else if (rows.length == 1) 
+        // {
+        //     var row = rows[0];
+        //     doPromptYesNoCancel
+        //     (
+        //         'Remove ' + row.name + ' and ALL sub permission templates (Yes) or ONLY this client (No)?',
+        //         function (result) 
+        //         {
+        //             if (!_.isNull(result))
+        //                 doServerDataMessage('expirepermissiontemplate', { permissiontemplateid: row.id, cascade: result }, { type: 'refresh' });
+        //         }
+        //     );
+        // }
+        // else 
+        // {
+        //     doPromptOkCancel
+        //     (
+        //         'Remove ' + rows.length + ' permission templates and ALL their sub permission templates?',
+        //         function (result) 
+        //         {
+        //             if (!_.isNull(result)) 
+        //             {
+        //                 rows.forEach
+        //                 (
+        //                     function (row) 
+        //                     {
+        //                         doServerDataMessage('expirepermissiontemplate', { permissiontemplateid: row.id, cascade: result }, { type: 'refresh' });
+        //                     }
+        //                 );
+        //             }
+        //         }
+        //     );
+        // }
     }
 
     function doDuplicate() 
@@ -206,8 +229,8 @@ function doPermissionTemplatesTabWidgets()
                 doRemove();
             // else if (args == 'removeparent')
             //     doRemoveParent();
-            else if (args == 'duplicate')
-                doDuplicate();
+            // else if (args == 'duplicate')
+            //     doDuplicate();
             // else if (args == 'details')
             //     doDetails();
         }

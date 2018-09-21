@@ -475,7 +475,13 @@ function doSaveClient(tx, world)
               function(err, result)
               {
                 if (!err)
-                  resolve({datemodified: global.moment(result.rows[0].datemodified).format('YYYY-MM-DD HH:mm:ss'), usermodified: result.rows[0].name});
+                  resolve
+                  (
+                    {
+                      datemodified: global.moment(result.rows[0].datemodified).format('YYYY-MM-DD HH:mm:ss'), 
+                      usermodified: result.rows[0].name
+                    }
+                  );
                 else
                   reject(err);
               }

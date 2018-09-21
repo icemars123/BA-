@@ -139,8 +139,10 @@ function doSavePermissionTemplate(tx, world)
                 'canviewalerts=$26,' + 
                 'cancreatealerts=$27,' + 
                 'canviewdashboard=$28,' + 
-                'cancreatedashboard=$29 ' +
-                'where id=$30',
+                'cancreatedashboard=$29, ' +
+                'datemodified=now(), ' +
+                'usersmodified_id=$30 ' +
+                'where customers_id=$31 and id=$32 and dateexpired is null',
                 [
                     __.sanitiseAsString(world.name, 50),
 
@@ -186,6 +188,8 @@ function doSavePermissionTemplate(tx, world)
                     world.canviewdashboard,
                     world.cancreatedashboard,
 
+                    world.cn.userid,
+                    world.cn.custid,
                     __.sanitiseAsBigInt(world.permissiontemplateid)
                 ],
                 function (err, result) 
@@ -194,8 +198,14 @@ function doSavePermissionTemplate(tx, world)
                     {
                         tx.query
                         (
-                            'select * from permissiontemplatedetails where id=$1',
+                            'select ' + 
+                            'p1.datemodified,u1.name ' +
+                            'from ' + 
+                            'permissiontemplatedetails p1 left join users u1 on (p1.usersmodified_id=u1.id) ' +
+                            'where ' +
+                            'p1.customers_id=$1 and p1.id=$2',
                             [
+                                world.cn.custid,
                                 __.sanitiseAsBigInt(world.permissiontemplateid)
                             ],
                             function (err, result) 
@@ -205,7 +215,8 @@ function doSavePermissionTemplate(tx, world)
                                     resolve
                                     (
                                         {
-                                            permissiontemplateid: result.rows[0].id
+                                            datemodified: global.moment(result.rows[0].datemodified).format('YYYY-MM-DD HH:mm:ss'),
+                                            usermodified: result.rows[0].name
                                         }
                                     );
                                 } 
@@ -215,6 +226,69 @@ function doSavePermissionTemplate(tx, world)
                         );
                     } 
                     else 
+                        reject(err);
+                }
+            );
+        }
+    );
+    return promise;
+}
+
+function doExpirePermissionTemplate(tx, world) 
+{
+    var promise = new global.rsvp.Promise
+    (
+        function (resolve, reject) 
+        {
+            tx.query
+            (
+                'update ' +
+                'permissiontemplatedetails ' + 
+                'set ' +
+                'dateexpired=now(),' + 
+                'usersexpired_id=$1 ' + 
+                'where ' +
+                'customers_id=$2 and id=$3 and dateexpired is null',
+                [
+                    world.cn.userid,
+                    world.cn.custid,
+                    __.sanitiseAsBigInt(world.permissiontemplateid)
+                ],
+                function (err, result) 
+                {
+                    if (!err) 
+                    {
+                        tx.query
+                        (
+                            'select ' + 
+                            'p1.permissiontemplatedetails_id permissiontemplateid,' +
+                            'p1.dateexpired,' +
+                            'u1.name ' + 
+                            'from ' + 
+                            'permissiontemplatedetails p1 left join users u1 on (p1.usersmodified_id=u1.id) ' + 
+                            'where ' + 
+                            'p1.customers_id=$1 and p1.id=$2',
+                            [
+                                world.cn.custid,
+                                __.sanitiseAsBigInt(world.permissiontemplateid)
+                            ],
+                            function (err, result) 
+                            {
+                                if (!err)
+                                    resolve
+                                    (
+                                        { 
+                                            permissiontemplateid: result.rows[0].permissiontemplateid, 
+                                            dateexpired: global.moment(result.rows[0].dateexpired).format('YYYY-MM-DD HH:mm:ss'), 
+                                            userexpired: result.rows[0].name 
+                                        }
+                                    );
+                                else
+                                    reject(err);
+                            }
+                        );
+                    }
+                    else
                         reject(err);
                 }
             );
@@ -277,39 +351,48 @@ function LoadPermissionTemplate(world)
                 client.query
                 (
                     'select ' + 
-                    'id,' +
-                    'name,' + 
-                    'canvieworders,' +
-                    'cancreateorders,' +
-                    'canviewinvoices,' +
-                    'cancreateinvoices,' + 
-                    'canviewinventory,' + 
-                    'cancreateinventory,' + 
-                    'canviewpayroll,' + 
-                    'cancreatepayroll,' + 
-                    'canviewproducts,' + 
-                    'cancreateproducts,' + 
-                    'canviewclients,' + 
-                    'cancreateclients,' + 
-                    'canviewcodes,' + 
-                    'cancreatecodes,' + 
-                    'canviewusers,' + 
-                    'cancreateusers,' + 
-                    'canviewbuilds,' +
-                    'cancreatebuilds,' + 
-                    'canviewtemplates,' +
-                    'cancreatetemplates,' + 
-                    'canviewbanking,' + 
-                    'cancreatebanking,' + 
-                    'canviewpurchasing,' + 
-                    'cancreatepurchasing,' + 
-                    'canviewalerts,' + 
-                    'cancreatealerts,' + 
-                    'canviewdashboard,' + 
-                    'cancreatedashboard ' +
-                    'from permissiontemplatedetails ' + 
-                    'where id=$1',
+                    'p1.id,' +
+                    'p1.name,' + 
+                    'p1.canvieworders,' +
+                    'p1.cancreateorders,' +
+                    'p1.canviewinvoices,' +
+                    'p1.cancreateinvoices,' + 
+                    'p1.canviewinventory,' + 
+                    'p1.cancreateinventory,' + 
+                    'p1.canviewpayroll,' + 
+                    'p1.cancreatepayroll,' + 
+                    'p1.canviewproducts,' + 
+                    'p1.cancreateproducts,' + 
+                    'p1.canviewclients,' + 
+                    'p1.cancreateclients,' + 
+                    'p1.canviewcodes,' + 
+                    'p1.cancreatecodes,' + 
+                    'p1.canviewusers,' + 
+                    'p1.cancreateusers,' + 
+                    'p1.canviewbuilds,' +
+                    'p1.cancreatebuilds,' + 
+                    'p1.canviewtemplates,' +
+                    'p1.cancreatetemplates,' + 
+                    'p1.canviewbanking,' + 
+                    'p1.cancreatebanking,' + 
+                    'p1.canviewpurchasing,' + 
+                    'p1.cancreatepurchasing,' + 
+                    'p1.canviewalerts,' + 
+                    'p1.cancreatealerts,' + 
+                    'p1.canviewdashboard,' + 
+                    'p1.cancreatedashboard, ' +
+                    'p1.datecreated, ' +
+                    'p1.datemodified, ' +
+                    'u1.name usercreated, ' +
+                    'u2.name usermodified ' +
+                    'from ' +
+                    'permissiontemplatedetails p1 left join permissiontemplatedetails p2 on (p1.permissiontemplatedetails_id=p2.id) ' + 
+                    '                             left join users u1 on (p1.userscreated_id=u1.id) ' +
+                    '                             left join users u2 on (p1.usersmodified_id=u2.id) ' +
+                    'where ' +
+                    'p1.customers_id=$1 and p1.id=$2',
                     [
+                        world.cn.custid,
                         __.sanitiseAsBigInt(world.permissiontemplateid)
                     ],
                     function (err, result) 
@@ -318,6 +401,17 @@ function LoadPermissionTemplate(world)
 
                         if (!err) 
                         {
+                            result.rows.forEach
+                            (
+                                function (p) 
+                                {
+                                    if (!__.isUndefined(p.datemodified) && !__.isNull(p.datemodified)) 
+                                        p.datemodified = global.moment(p.datemodified).format('YYYY-MM-DD HH:mm:ss');
+
+                                    p.datecreated = global.moment(p.datecreated).format('YYYY-MM-DD HH:mm:ss');
+                                }
+                            );
+
                             world.spark.emit
                             (
                                 world.eventname, 
@@ -471,48 +565,67 @@ function ListPermissionTemplates(world)
                 client.query
                 (
                     'select ' + 
-                    'id,' +
-                    'name,' + 
-                    'canvieworders,' +
-                    'cancreateorders,' +
-                    'canviewinvoices,' +
-                    'cancreateinvoices,' + 
-                    'canviewinventory,' + 
-                    'cancreateinventory,' + 
-                    'canviewpayroll,' + 
-                    'cancreatepayroll,' + 
-                    'canviewproducts,' + 
-                    'cancreateproducts,' + 
-                    'canviewclients,' + 
-                    'cancreateclients,' + 
-                    'canviewcodes,' + 
-                    'cancreatecodes,' + 
-                    'canviewusers,' + 
-                    'cancreateusers,' + 
-                    'canviewbuilds,' +
-                    'cancreatebuilds,' + 
-                    'canviewtemplates,' +
-                    'cancreatetemplates,' + 
-                    'canviewbanking,' + 
-                    'cancreatebanking,' + 
-                    'canviewpurchasing,' + 
-                    'cancreatepurchasing,' + 
-                    'canviewalerts,' + 
-                    'cancreatealerts,' + 
-                    'canviewdashboard,' + 
-                    'cancreatedashboard ' +
-                    'from permissiontemplatedetails',
+                    'p1.id,' +
+                    'p1.name,' + 
+                    'p1.canvieworders,' +
+                    'p1.cancreateorders,' +
+                    'p1.canviewinvoices,' +
+                    'p1.cancreateinvoices,' + 
+                    'p1.canviewinventory,' + 
+                    'p1.cancreateinventory,' + 
+                    'p1.canviewpayroll,' + 
+                    'p1.cancreatepayroll,' + 
+                    'p1.canviewproducts,' + 
+                    'p1.cancreateproducts,' + 
+                    'p1.canviewclients,' + 
+                    'p1.cancreateclients,' + 
+                    'p1.canviewcodes,' + 
+                    'p1.cancreatecodes,' + 
+                    'p1.canviewusers,' + 
+                    'p1.cancreateusers,' + 
+                    'p1.canviewbuilds,' +
+                    'p1.cancreatebuilds,' + 
+                    'p1.canviewtemplates,' +
+                    'p1.cancreatetemplates,' + 
+                    'p1.canviewbanking,' + 
+                    'p1.cancreatebanking,' + 
+                    'p1.canviewpurchasing,' + 
+                    'p1.cancreatepurchasing,' + 
+                    'p1.canviewalerts,' + 
+                    'p1.cancreatealerts,' + 
+                    'p1.canviewdashboard,' + 
+                    'p1.cancreatedashboard, ' +
+                    'p1.datecreated,' +
+                    'p1.datemodified,' +
+                    'u1.name usercreated,' +
+                    'u2.name usermodified ' +
+                    'from ' +
+                    'permissiontemplatedetails p1 left join permissiontemplatedetails p2 on (p1.permissiontemplatedetails_id=p2.id) ' + 
+                    '                             left join users u1 on (p1.userscreated_id=u1.id) ' +
+                    '                             left join users u2 on (p1.usersmodified_id=u2.id) ' +
+                    'where ' +
+                    'p1.customers_id=$1 ' +
+                    'and ' +
+                    'p1.dateexpired is null ',
+                    [
+                        world.cn.custid
+                    ],
                     function (err, result) 
                     {
                         done();
                         
                         if (!err) 
                         {
-                            // result.rows.forEach(element => 
-                            //     {
-                            //         if (__.isUndefined())
-                            //     }
-                            // );
+                            result.rows.forEach
+                            (
+                                function (p) 
+                                {
+                                    if (!__.isUndefined(p.datemodified) && !__.isNull(p.datemodified))
+                                        p.datemodified = global.moment(p.datemodified).format('YYYY-MM-DD HH:mm:ss');
+
+                                    p.datecreated = global.moment(p.datecreated).format('YYYY-MM-DD HH:mm:ss');
+                                }
+                            );
                             world.spark.emit(world.eventname, {rc: global.errcode_none, msg: global.text_success, fguid: world.fguid, rs: result.rows, pdata: world.pdata});
                         } 
                         else 
@@ -569,8 +682,8 @@ function SavePermissionTemplate(world)
                                                         rc: global.errcode_none,
                                                         msg: global.text_success,
                                                         permissiontemplateid: result.permissiontemplateid,
-                                                        // datecreated: result.datecreated,
-                                                        // usercreated: result.usercreated,
+                                                        datecreated: result.datecreated,
+                                                        usercreated: result.usercreated,
                                                         pdata: world.pdata
                                                     }
                                                 );
@@ -580,8 +693,8 @@ function SavePermissionTemplate(world)
                                                     'permissiontemplatesaved', 
                                                     { 
                                                         permissiontemplateid: result.permissiontemplateid,
-                                                        // datecreated: result.datecreated,
-                                                        // usercreated: result.usercreated
+                                                        datecreated: result.datecreated,
+                                                        usercreated: result.usercreated
                                                     }, 
                                                     world.spark.id
                                                 );
@@ -659,13 +772,13 @@ function ExpirePermissionTemplate(world)
                     {
                         if (!err) 
                         {
-                            doExpirePermissionTemplateStep1(tx, world).then
-                            (
-                                function (ignore) 
-                                {
-                                    return doExpirePermissionTemplateStep2(tx, world);
-                                }
-                            ).then
+                            doExpirePermissionTemplate(tx, world).then
+                            // (
+                            //     function (ignore) 
+                            //     {
+                            //         return doExpirePermissionTemplateStep2(tx, world);
+                            //     }
+                            // ).then
                             (
                                 function (result) 
                                 {
@@ -683,8 +796,8 @@ function ExpirePermissionTemplate(world)
                                                         rc: global.errcode_none, 
                                                         msg: global.text_success, 
                                                         permissiontemplateid: result.permissiontemplateid,
-                                                        // dateexpired: result.dateexpired, 
-                                                        // userexpired: result.userexpired, 
+                                                        dateexpired: result.dateexpired, 
+                                                        userexpired: result.userexpired, 
                                                         pdata: world.pdata 
                                                     }
                                                 );
@@ -694,8 +807,8 @@ function ExpirePermissionTemplate(world)
                                                     'permissiontemplateexpired', 
                                                     { 
                                                         permissiontemplateid: result.permissiontemplateid,
-                                                        // dateexpired: result.dateexpired, 
-                                                        // userexpired: result.userexpired 
+                                                        dateexpired: result.dateexpired, 
+                                                        userexpired: result.userexpired 
                                                     }, 
                                                     world.spark.id
                                                 );

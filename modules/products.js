@@ -3551,8 +3551,29 @@ function SaveProductCategory(world)
                       if (!err)
                       {
                         done();
-                        world.spark.emit(world.eventname, {rc: global.errcode_none, msg: global.text_success, productcategoryid: world.productcategoryid, datemodified: result.datemodified, usermodified: result.usermodified, pdata: world.pdata});
-                        global.pr.sendToRoomExcept(global.custchannelprefix + world.cn.custid, 'productcategorysaved', {productcategoryid: world.productcategoryid, datemodified: result.datemodified, usermodified: result.usermodified}, world.spark.id);
+                        world.spark.emit
+                        (
+                          world.eventname, 
+                          {
+                            rc: global.errcode_none, 
+                            msg: global.text_success, 
+                            productcategoryid: world.productcategoryid, 
+                            datemodified: result.datemodified, 
+                            usermodified: result.usermodified, 
+                            pdata: world.pdata
+                          }
+                        );
+                        global.pr.sendToRoomExcept
+                        (
+                          global.custchannelprefix + world.cn.custid, 
+                          'productcategorysaved', 
+                          {
+                            productcategoryid: world.productcategoryid, 
+                            datemodified: result.datemodified, 
+                            usermodified: result.usermodified
+                          }, 
+                          world.spark.id
+                        );
                       }
                       else
                       {
