@@ -1,35 +1,29 @@
+
 // TODO: Instead of calling refreshFromCacheXXXXX() methods directly from here - use fireEvent on divEvents... so makes methods independent and also allows  multiple dependencies to auto consume the event....
 //       See dlg-build-template-details.js for example consumption/usage...
-function addChannels(c)
-{
-  if (_.isArray(c))
-  {
+function addChannels(c) {
+  if (_.isArray(c)) {
     c.forEach
-    (
-      function(chan)
-      {
+      (
+      function (chan) {
         if (channels.indexOf(chan) == -1)
           channels.push(chan);
       }
-    );
+      );
   }
-  else
-  {
+  else {
     if (channels.indexOf(c) == -1)
       channels.push(c);
   }
 }
 
-function doJoinChannels()
-{
-  if (!_.isUN(channels))
-  {
+function doJoinChannels() {
+  if (!_.isUN(channels)) {
     channels.forEach
-    (
-      function(channel)
-      {
+      (
+      function (channel) {
         primus.emit
-        (
+          (
           'join',
           {
             fguid: fguid,
@@ -38,132 +32,119 @@ function doJoinChannels()
             channel: channel,
             pdata: 'join'
           }
-        );
+          );
       }
-    );
+      );
   }
 }
 
-function doPrimus()
-{
-  try
-  {
+function doPrimus() {
+  try {
     console.log('***** Init Primus...');
     primus = new Primus
-    (
+      (
       server,
       {
-        reconnect: {maxDelay: 15 * 1000, minDelay: 1000, retries: 1000},
+        reconnect: { maxDelay: 15 * 1000, minDelay: 1000, retries: 1000 },
         strategy: ['disconnect', 'timeout']
       }
-    );
+      );
 
     // Add error listener as soon as possible after open - so we can catch connection errors...
     primus.on
-    (
+      (
       'error',
-      function(err)
-      {
+      function (err) {
         // Note we get a connection error first if we get "disconnected", then an "offline"" event, finally a "close" event...
         // We mark disconnection here as we will get this event faster than an "offline" or "close" event - especially after a pause/resumed cycle where we need to detect and force a reconnect quickly...
         $('#divDashConnectionStatus').html('<img style="vertical-align: middle;" src="data:image/png;base64,' + b64disconnected + '" width="24" height="24"/> Oops, server may be lost...');
         connected = false;
       }
-    );
+      );
 
     // Connection events from primus itself...
     primus.on
-    (
+      (
       'open',
-      function()
-      {
+      function () {
         $('#divDashConnectionStatus').html(document.createTextNode('Connected to server...'));
         connected = true;
-        if (firstconnection)
-        {
-          if (annyang)
-          {
+        if (firstconnection) {
+          if (annyang) {
             if (!ispos)
-              noty({text: 'Your browser supports speech recognition - Click Allow Microphone Access..."', type: 'success', timeout: 5000});
+              noty({ text: 'Your browser supports speech recognition - Click Allow Microphone Access..."', type: 'success', timeout: 5000 });
           }
           firstconnection = false;
         }
         // We also get here after a temporary disconnection -  so we need to rejoin channels as server would have dumped us...
         doJoinChannels();
       }
-    );
+      );
 
     primus.on
-    (
+      (
       'close',
-      function()
-      {
+      function () {
         $('#divDashConnectionStatus').html('<img style="vertical-align: middle;" src="data:image/png;base64,' + b64disconnected + '" width="24" height="24"/> OK, server has gone away, don\'t worry, will look for it shortly...');
         console.log('***** Server has gone away...');
       }
-    );
+      );
 
     primus.on
-    (
+      (
       'end',
-      function()
-      {
+      function () {
         console.log('***** Connection ended...');
       }
-    );
+      );
 
     primus.on
-    (
+      (
       'reconnecting',
-      function(opts)
-      {
+      function (opts) {
         var s = opts.timeout / 1000;
 
         s = s.toFixed(0);
         $('#divDashConnectionStatus').html('<img style="vertical-align: middle;" src="data:image/png;base64,' + b64searching + '" width="24" height="24"/> Sending search party for server in ' + s + 's, retry ' + opts.attempt + ' of ' + opts.retries);
         console.log('***** Reconecting in ' + s + 's');
       }
-    );
+      );
 
     primus.on
-    (
+      (
       'reconnect',
-      function()
-      {
+      function () {
         $('#divDashConnectionStatus').html('<img style="vertical-align: middle;" src="data:image/png;base64,' + b64gears + '" width="24" height="24"/> Looking for server now...');
         console.log('***** Looking for server...');
       }
-    );
+      );
 
     // Auth events
     primus.on
-    (
+      (
       'welcome',
-      function(data)
-      {
+      function (data) {
         fguid = data.fguid;
         //
         console.log('***** Server welcome...');
         //
         addChannels(data.channel);
         showIdle();
-        $('#divEvents').trigger('poswelcome', {pdata: 'none'});
+        $('#divEvents').trigger('poswelcome', { pdata: 'none' });
       }
-    );
+      );
 
     primus.on
-    (
+      (
       'join',
-      function(data)
-      {
+      function (data) {
       }
-    );
+      );
 
     primus.on
-    (
+      (
       'login',
-      function(data)
-      {
+      function (data) {
         console.log('***** Login successful...');
 
         uid = data.uid;
@@ -176,9 +157,8 @@ function doPrimus()
         myperms = data.permissions;
         session = data.session;
 
-        if (isclient)
-        {
-          noty({text: 'Access denied... please use client login', type: 'error'});
+        if (isclient) {
+          noty({ text: 'Access denied... please use client login', type: 'error' });
           return;
         }
         /*
@@ -215,30 +195,27 @@ function doPrimus()
 
         if (_.isBlank(imgAvatar))
           $('#spnMenu').html('Logged in as <strong>' + _.titleize(uname) + '</strong>');
-        else
-        {
+        else {
           $('#spnMenu').html
-          (
+            (
             '<table><tr>' +
-              '<td valign="middle">' + imgAvatar + '</td>' +
-              '<td valign="middle">Logged in as <strong>' + _.titleize(uname) + '</strong></td>' +
+            '<td valign="middle">' + imgAvatar + '</td>' +
+            '<td valign="middle">Logged in as <strong>' + _.titleize(uname) + '</strong></td>' +
             '</tr></table>'
-          );
+            );
         }
 
         // Indicate which server we're connected to and close login dialog...
         $('#spnServer').text(server);
         $('#dlgLogin').dialog('close');
 
-        if (!ispos)
-        {
+        if (!ispos) {
           // Trigger refresh/load of all data...
-          $('#divEvents').trigger('refresh-all', {pdata: 'none'});
+          $('#divEvents').trigger('refresh-all', { pdata: 'none' });
 
           console.log('***** Determining permissions...');
 
-          if (posonly)
-          {
+          if (posonly) {
             $('#as1tabs').tabs('close', 'Command TAB');
             $('#as1tabs').tabs('close', 'Dashboard');
             $('#as1tabs').tabs('close', 'Purchasing');
@@ -261,8 +238,7 @@ function doPrimus()
             $('#maintenancetabs').tabs('close', 'Print Templates');
             $('#maintenancetabs').tabs('close', 'Emails');
 
-            if (!isadmin)
-            {
+            if (!isadmin) {
               // Inventory
               if (!myperms.canviewinventory)
                 $('#as1tabs').tabs('close', 'Inventory');
@@ -271,35 +247,29 @@ function doPrimus()
               $('#salestabs').tabs('close', 'Clients');
             }
           }
-          else
-          {
+          else {
             // Close TABs where user permissions deny viewing
             // Can't handle creation permissions here since TAB panels are not yet loaded...
-            if (!isadmin)
-            {
+            if (!isadmin) {
               console.log(myperms);
               // Alerts
-              if (!myperms.canviewalerts)
-              {
+              if (!myperms.canviewalerts) {
                 $('#dashtabs').tabs('close', 'Alerts');
                 $('#maintenancetabs').tabs('close', 'Status Alerts');
               }
 
               // Codes
-              if (!myperms.canviewcodes)
-              {
+              if (!myperms.canviewcodes) {
                 $('#as1tabs').tabs('close', 'Accounts');
               }
 
               // Orders
-              if (!myperms.canvieworders)
-              {
+              if (!myperms.canvieworders) {
                 $('#dashtabs').tabs('close', 'Order Cards');
                 $('#salestabs').tabs('close', 'Orders');
               }
 
-              if (!myperms.cancreateorders)
-              {
+              if (!myperms.cancreateorders) {
                 // Can't change/add orders
                 $('#tbOrdersNew').hide();
                 $('#tbOrdersRemove').hide();
@@ -329,65 +299,55 @@ function doPrimus()
               }
 
               // Invoices
-              if (!myperms.canviewinvoices)
-              {
+              if (!myperms.canviewinvoices) {
                 $('#salestabs').tabs('close', 'Invoices');
               }
 
               // Clients
-              if (!myperms.canviewclients)
-              {
+              if (!myperms.canviewclients) {
                 $('#salestabs').tabs('close', 'Clients');
                 $('#salestabs').tabs('close', 'Suppliers');
               }
 
               // Purchasing
-              if (!myperms.canviewpurchasing)
-              {
+              if (!myperms.canviewpurchasing) {
                 $('#as1tabs').tabs('close', 'Purchasing');
               }
 
               // Inventory
-              if (!myperms.canviewinventory)
-              {
+              if (!myperms.canviewinventory) {
                 $('#inventorytabs').tabs('close', 'Locations');
                 $('#inventorytabs').tabs('close', 'Stock');
               }
 
               // Products
-              if (!myperms.canviewproducts)
-              {
+              if (!myperms.canviewproducts) {
                 $('#inventorytabs').tabs('close', 'Products');
                 $('#inventorytabs').tabs('close', 'Categories');
               }
 
               // Builds
-              if (!myperms.canviewbuilds)
-              {
+              if (!myperms.canviewbuilds) {
                 $('#inventorytabs').tabs('close', 'Build Templates');
               }
 
               // Banking
-              if (!myperms.canviewbanking)
-              {
+              if (!myperms.canviewbanking) {
                 $('#as1tabs').tabs('close', 'Banking');
               }
 
               // Payroll
-              if (!myperms.canviewpayroll)
-              {
+              if (!myperms.canviewpayroll) {
                 $('#as1tabs').tabs('close', 'Payroll');
               }
 
               // Users
-              if (!myperms.canviewusers)
-              {
+              if (!myperms.canviewusers) {
                 $('#maintenancetabs').tabs('close', 'Users');
               }
 
               // Templates
-              if (!myperms.canviewtemplates)
-              {
+              if (!myperms.canviewtemplates) {
                 $('#maintenancetabs').tabs('close', 'Permission Templates');
                 $('#maintenancetabs').tabs('close', 'Product Templates');
                 $('#maintenancetabs').tabs('close', 'Print Templates');
@@ -413,8 +373,7 @@ function doPrimus()
               if (!myperms.canviewproducts)
                 nodeinventory.children[0].children.splice(0, 1);
 
-              if (myperms.canviewinventory)
-              {
+              if (myperms.canviewinventory) {
                 allowednodes.push(nodejobsheets);
                 allowednodes.push(nodeinventory);
               }
@@ -429,8 +388,7 @@ function doPrimus()
               // If can't view users and templates, then may as well close all of maintenance TAB...
               if (!myperms.canviewusers && !myperms.canviewtemplates)
                 $('#as1tabs').tabs('close', 'Maintenance');
-              else
-              {
+              else {
                 $('#maintenancetabs').tabs('close', 'Status Alerts');
                 $('#maintenancetabs').tabs('close', 'Permission Templates');
                 $('#maintenancetabs').tabs('close', 'Product Templates');
@@ -443,8 +401,7 @@ function doPrimus()
               if (!ispos)
                 cmdcentre = new Treant(allowednodes);
             }
-            else
-            {
+            else {
               // TODO: Not implemented tabs...
               //$('#as1tabs').tabs('disableTab', 'Purchasing');
               $('#bankingtabs').tabs('disableTab', 'Receipts');
@@ -454,8 +411,7 @@ function doPrimus()
               $('#payrolltabs').tabs('disableTab', 'Rosters');
 
               // Make checking easier later...
-              for (var propkey in myperms)
-              {
+              for (var propkey in myperms) {
                 // We check if this key exists in the obj
                 if (myperms.hasOwnProperty(propkey))
                   myperms[propkey] = 1;
@@ -468,18 +424,17 @@ function doPrimus()
           doWidgetListeners();
         }
         else
-          $('#divEvents').trigger('posready', {pdata: 'none'});
+          $('#divEvents').trigger('posready', { pdata: 'none' });
       }
-    );
+      );
 
     primus.on
-    (
+      (
       'changepassword',
-      function(data)
-      {
-        $('#divEvents').trigger('changepassword', {data: data, pdata: $.extend(data.pdata, {})});
+      function (data) {
+        $('#divEvents').trigger('changepassword', { data: data, pdata: $.extend(data.pdata, {}) });
       }
-    );
+      );
 
     // ************************************************************************************************************************************************************************************************
     // Application responses
@@ -487,20 +442,17 @@ function doPrimus()
 
     // Account requests
     primus.on
-    (
+      (
       'listaccounts',
-      function(data)
-      {
+      function (data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_accounts = [];
 
           data.rs.forEach
-          (
-            function(a)
-            {
+            (
+            function (a) {
               var name = doNiceTitleizeString(a.name);
               var node =
               {
@@ -521,46 +473,41 @@ function doPrimus()
 
               if (_.isUN(a.parentid))
                 cache_accounts.push(node);
-              else
-              {
+              else {
                 var parent = doFindParentNode(cache_accounts, a.parentid);
                 // Find parent...
                 if (!_.isUN(parent))
                   parent.children.push(node);
               }
             }
-          );
+            );
 
-          $('#divEvents').trigger('listaccounts', {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger('listaccounts', { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
-
-    function doAddPrimusListenerEmitter(eventname, emitname)
-    {
-      primus.on
-      (
-        eventname,
-        function(data)
-        {
-          doServerMessage(emitname, {type: 'refresh'});
-        }
       );
+
+    function doAddPrimusListenerEmitter(eventname, emitname) {
+      primus.on
+        (
+        eventname,
+        function (data) {
+          doServerMessage(emitname, { type: 'refresh' });
+        }
+        );
     }
 
-    function doAddPrimusListener(eventname, cb)
-    {
+    function doAddPrimusListener(eventname, cb) {
       primus.on
-      (
+        (
         eventname,
-        function(data)
-        {
+        function (data) {
           if (!_.isUN(cb))
             cb(eventname, data);
           else
-            $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+            $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
-      );
+        );
     }
 
     // Account requests
@@ -578,22 +525,19 @@ function doPrimus()
 
     // Exchange rate requests
     primus.on
-    (
+      (
       'listexchangerates',
-      function(data)
-      {
+      function (data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_exchangerates = [];
 
           data.rs.forEach
-          (
-            function(x)
-            {
+            (
+            function (x) {
               cache_exchangerates.push
-              (
+                (
                 {
                   id: doNiceId(x.id),
                   provider: doNiceString(x.provider),
@@ -603,14 +547,14 @@ function doPrimus()
                   date: doNiceDateModifiedOrCreated(x.datemodified, x.datecreated),
                   by: doNiceModifiedBy(x.datemodified, x.usermodified, x.usercreated)
                 }
-              );
+                );
             }
-          );
+            );
 
-          $('#divEvents').trigger('listexchangerates', {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger('listexchangerates', { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     doAddPrimusListener('newexchangerate');
     doAddPrimusListener('saveexchangerate');
@@ -625,22 +569,19 @@ function doPrimus()
     doAddPrimusListener('checktaxcode');
 
     doAddPrimusListener
-    (
+      (
       'listtaxcodes',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_taxcodes = [];
 
           data.rs.forEach
-          (
-            function(t)
-            {
+            (
+            function (t) {
               cache_taxcodes.push
-              (
+                (
                 {
                   id: doNiceId(t.id),
                   code: doNiceString(t.code),
@@ -649,14 +590,14 @@ function doPrimus()
                   date: doNiceDateModifiedOrCreated(t.datemodified, t.datecreated),
                   by: doNiceModifiedBy(t.datemodified, t.usermodified, t.usercreated)
                 }
-              );
+                );
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     // Location requests
     doAddPrimusListener('loadlocation');
@@ -667,20 +608,17 @@ function doPrimus()
     doAddPrimusListener('checklocationcode');
 
     doAddPrimusListener
-    (
+      (
       'listlocations',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_locations = [];
 
           data.rs.forEach
-          (
-            function(l)
-            {
+            (
+            function (l) {
               var name = doNiceString(l.name);
               var node =
               {
@@ -714,20 +652,19 @@ function doPrimus()
 
               if (_.isUN(l.parentid))
                 cache_locations.push(node);
-              else
-              {
+              else {
                 var parent = doFindParentNode(cache_locations, l.parentid);
                 // Find parent...
                 if (!_.isUN(parent))
                   parent.children.push(node);
               }
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     // Client requests
     doAddPrimusListener('loadclient');
@@ -739,20 +676,17 @@ function doPrimus()
     doAddPrimusListener('listemails');
 
     doAddPrimusListener
-    (
+      (
       'listclients',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_clients = [];
 
           data.rs.forEach
-          (
-            function(c)
-            {
+            (
+            function (c) {
               var name = doNiceString(c.name);
               var node =
               {
@@ -772,20 +706,19 @@ function doPrimus()
 
               if (_.isUN(c.parentid))
                 cache_clients.push(node);
-              else
-              {
+              else {
                 var parent = doFindParentNode(cache_clients, c.parentid);
                 // Find parent...
                 if (!_.isUN(parent))
                   parent.children.push(node);
               }
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     // Client note requests
     doAddPrimusListener('listclientnotes');
@@ -808,20 +741,17 @@ function doPrimus()
     doAddPrimusListener('checksuppliercode');
 
     doAddPrimusListener
-    (
+      (
       'listsuppliers',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_suppliers = [];
 
           data.rs.forEach
-          (
-            function(c)
-            {
+            (
+            function (c) {
               var name = doNiceString(c.name);
               var node =
               {
@@ -841,20 +771,19 @@ function doPrimus()
 
               if (_.isUN(c.parentid))
                 cache_suppliers.push(node);
-              else
-              {
+              else {
                 var parent = doFindParentNode(cache_suppliers, c.parentid);
                 // Find parent...
                 if (!_.isUN(parent))
                   parent.children.push(node);
               }
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     // Supplier note requests
     doAddPrimusListener('listsuppliernotes');
@@ -875,20 +804,17 @@ function doPrimus()
     doAddPrimusListener('checkemployeecode');
 
     doAddPrimusListener
-    (
+      (
       'listemployees',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_employees = [];
 
           data.rs.forEach
-          (
-            function(e)
-            {
+            (
+            function (e) {
               var node =
               {
                 id: doNiceId(e.id),
@@ -909,39 +835,35 @@ function doPrimus()
 
               if (_.isUN(e.parentid))
                 cache_employees.push(node);
-              else
-              {
+              else {
                 var parent = doFindParentNode(cache_employees, e.parentid);
                 // Find parent...
                 if (!_.isUN(parent))
                   parent.children.push(node);
               }
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     // Payroll requests
     doAddPrimusListener
-    (
+      (
       'listpayrollemployees',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_employees = [];
 
           data.rs.forEach
-          (
-            function(e)
-            {
+            (
+            function (e) {
               cache_employees.push
-              (
+                (
                 {
                   id: doNiceId(e.id),
                   parentid: doNiceId(e.parentid),
@@ -951,14 +873,14 @@ function doPrimus()
                   date: doNiceDateModifiedOrCreated(e.datemodified, e.datecreated),
                   by: doNiceModifiedBy(e.datemodified, e.usermodified, e.usercreated)
                 }
-              );
+                );
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     // User requests
     doAddPrimusListener('loaduser');
@@ -971,24 +893,21 @@ function doPrimus()
     doAddPrimusListener('saveuserpermissions');
 
     doAddPrimusListener
-    (
+      (
       'listusers',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_users = [];
 
           data.rs.forEach
-          (
-            function(u)
-            {
+            (
+            function (u) {
               var imgstatus = (u.uuid == uuid) ? mapUserStatusToImage('online') : mapUserStatusToImage('unknown');
 
               cache_users.push
-              (
+                (
                 {
                   uuid: doNiceString(u.uuid),
                   name: doNiceString(u.uname),
@@ -1034,14 +953,14 @@ function doPrimus()
                   by: doNiceModifiedBy(u.datemodified, u.usermodified, u.usercreated),
                   status: imgstatus
                 }
-              );
+                );
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     // Superfund requests
     doAddPrimusListener('newsuperfund');
@@ -1050,36 +969,33 @@ function doPrimus()
     doAddPrimusListener('checksuperfundname');
 
     doAddPrimusListener
-    (
+      (
       'listsuperfunds',
-      function(eventname,data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_superfunds = [];
 
           data.rs.forEach
-          (
-            function(s)
-            {
+            (
+            function (s) {
               cache_superfunds.push
-              (
+                (
                 {
                   id: doNiceId(s.id),
                   name: doNiceString(s.name),
                   date: doNiceDateModifiedOrCreated(s.datemodified, s.datecreated),
                   by: doNiceModifiedBy(s.datemodified, s.usermodified, s.usercreated)
                 }
-              );
+                );
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     // Invoice requests
     doAddPrimusListener('listinvoices');
@@ -1094,16 +1010,13 @@ function doPrimus()
     doAddPrimusListener('searchinvoices');
 
     doAddPrimusListener
-    (
+      (
       'printinvoices',
-      function(eventname, data)
-      {
-        if (!_.isUN(data.rs))
-        {
+      function (eventname, data) {
+        if (!_.isUN(data.rs)) {
           data.rs.forEach
-          (
-            function(f)
-            {
+            (
+            function (f) {
               var url = '/di?no=' + f.invoiceno + '&fguid=' + fguid;
               var w = window.open(url, '_blank');
 
@@ -1112,79 +1025,70 @@ function doPrimus()
 
               doShowSuccess('Invoice [' + f.invoiceno + '] has been downloaded');
             }
-          );
+            );
 
           // Get updated display of #copies printed for invoice(s)
-          primus.emit('listinvoices', {fguid: fguid, uuid: uuid, session: session, pdata: $.extend(data.pdata, {})});
+          primus.emit('listinvoices', { fguid: fguid, uuid: uuid, session: session, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     doAddPrimusListener
-    (
+      (
       'printorders',
-      function(eventname, data)
-      {
-        if (!_.isUN(data.rs))
-        {
+      function (eventname, data) {
+        if (!_.isUN(data.rs)) {
           data.rs.forEach
-          (
-            function(f)
-            {
+            (
+            function (f) {
               var url = '/do?no=' + f.orderno + '&fguid=' + fguid;
               var w = window.open(url, '_blank');
 
               if (w)
                 w.print();
             }
-          );
+            );
         }
       }
-    );
+      );
 
     doAddPrimusListener
-    (
+      (
       'printdeliverydockets',
-      function(eventname, data)
-      {
-        if (!_.isUN(data.rs))
-        {
+      function (eventname, data) {
+        if (!_.isUN(data.rs)) {
           data.rs.forEach
-          (
-            function(f)
-            {
+            (
+            function (f) {
               var url = '/do?filename=' + f;
               var w = window.open(url, '_blank');
 
               if (w)
                 w.print();
             }
-          );
+            );
         }
       }
-    );
+      );
 
     doAddPrimusListener
-    (
+      (
       'printquotes',
-      function(eventname, data)
-      {
-        if (!_.isUN(data.rs))
-        {
+      function (eventname, data) {
+        if (!_.isUN(data.rs)) {
           data.rs.forEach
-          (
-            function(f)
-            {
+            (
+            function (f) {
               var url = '/do?filename=' + f;
               var w = window.open(url, '_blank');
 
               if (w)
                 w.print();
             }
-          );
+            );
         }
       }
-    );
+      );
 
     // Config requests
     doAddPrimusListener('saveconfig');
@@ -1194,73 +1098,71 @@ function doPrimus()
     doAddPrimusListener('expireprinttemplate');
 
     doAddPrimusListener
-    (
+      (
       'loadconfig',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs) && (data.rs.length == 1))
-        {
+        if (!_.isUN(data.rs) && (data.rs.length == 1)) {
           var cfg = data.rs[0];
 
           cache_config =
-          {
-            statusid: cfg.statusid,
-            inventoryadjustaccountid: cfg.inventoryadjustaccountid,
-            currentquoteno: cfg.currentquoteno,
-            currentorderno: cfg.currentorderno,
-            currentporderno: cfg.currentporderno,
-            currentinvoiceno: cfg.currentinvoiceno,
-            currentjournalno: cfg.currentjournalno,
-            currentclientno: cfg.currentclientno,
-            currentsupplierno: cfg.currentsupplierno,
-            currentempno: cfg.currentempno,
-            currentjobsheetno: cfg.currentjobsheetno,
-            currentbarcodeno: cfg.currentbarcodeno,
-            orderasquote: doNiceIntToBool(cfg.orderasquote),
-            inventoryusefifo: doNiceIntToBool(cfg.inventoryusefifo),
-            defaultinventorylocationid: cfg.defaultinventorylocationid,
-            gstpaidaccountid: cfg.gstpaidaccountid,
-            gstcollectedaccountid: cfg.gstcollectedaccountid,
-            invoiceprinttemplateid: cfg.invoiceprinttemplateid,
-            orderprinttemplateid: cfg.orderprinttemplateid,
-            quoteprinttemplateid: cfg.quoteprinttemplateid,
-            deliverydocketprinttemplateid: cfg.deliverydocketprinttemplateid,
-            araccountid: cfg.araccountid,
-            apaccountid: cfg.apaccountid,
-            productcostofgoodsaccountid: cfg.productcostofgoodsaccountid,
-            productincomeaccountid: cfg.productincomeaccountid,
-            productassetaccountid: cfg.productassetaccountid,
-            productbuytaxcodeid: cfg.productbuytaxcodeid,
-            productselltaxcodeid: cfg.productselltaxcodeid,
-            fyearstart: cfg.fyearstart,
-            fyearend: cfg.fyearend,
-            companyname: cfg.companyname,
-            address1: cfg.address1,
-            address2: cfg.address2,
-            address3: cfg.address3,
-            address4: cfg.address4,
-            city: cfg.city,
-            state: cfg.state,
-            postcode: cfg.postcode,
-            country: cfg.country,
-            bankname: cfg.bankname,
-            bankbsb: cfg.bankbsb,
-            bankaccountno: cfg.bankaccountno,
-            bankaccountname: cfg.bankaccountname,
-            expressfee: _.sanitiseAsNumeric(cfg.expressfee, 2),
-            autosyncbuildtemplates: cfg.autosyncbuildtemplates,
-            attrib1name: cfg.attrib1name,
-            attrib2name: cfg.attrib2name,
-            attrib3name: cfg.attrib3name,
-            attrib4name: cfg.attrib4name,
-            attrib5name: cfg.attrib5name,
-            posclientid: cfg.posclientid,
+            {
+              statusid: cfg.statusid,
+              inventoryadjustaccountid: cfg.inventoryadjustaccountid,
+              currentquoteno: cfg.currentquoteno,
+              currentorderno: cfg.currentorderno,
+              currentporderno: cfg.currentporderno,
+              currentinvoiceno: cfg.currentinvoiceno,
+              currentjournalno: cfg.currentjournalno,
+              currentclientno: cfg.currentclientno,
+              currentsupplierno: cfg.currentsupplierno,
+              currentempno: cfg.currentempno,
+              currentjobsheetno: cfg.currentjobsheetno,
+              currentbarcodeno: cfg.currentbarcodeno,
+              orderasquote: doNiceIntToBool(cfg.orderasquote),
+              inventoryusefifo: doNiceIntToBool(cfg.inventoryusefifo),
+              defaultinventorylocationid: cfg.defaultinventorylocationid,
+              gstpaidaccountid: cfg.gstpaidaccountid,
+              gstcollectedaccountid: cfg.gstcollectedaccountid,
+              invoiceprinttemplateid: cfg.invoiceprinttemplateid,
+              orderprinttemplateid: cfg.orderprinttemplateid,
+              quoteprinttemplateid: cfg.quoteprinttemplateid,
+              deliverydocketprinttemplateid: cfg.deliverydocketprinttemplateid,
+              araccountid: cfg.araccountid,
+              apaccountid: cfg.apaccountid,
+              productcostofgoodsaccountid: cfg.productcostofgoodsaccountid,
+              productincomeaccountid: cfg.productincomeaccountid,
+              productassetaccountid: cfg.productassetaccountid,
+              productbuytaxcodeid: cfg.productbuytaxcodeid,
+              productselltaxcodeid: cfg.productselltaxcodeid,
+              fyearstart: cfg.fyearstart,
+              fyearend: cfg.fyearend,
+              companyname: cfg.companyname,
+              address1: cfg.address1,
+              address2: cfg.address2,
+              address3: cfg.address3,
+              address4: cfg.address4,
+              city: cfg.city,
+              state: cfg.state,
+              postcode: cfg.postcode,
+              country: cfg.country,
+              bankname: cfg.bankname,
+              bankbsb: cfg.bankbsb,
+              bankaccountno: cfg.bankaccountno,
+              bankaccountname: cfg.bankaccountname,
+              expressfee: _.sanitiseAsNumeric(cfg.expressfee, 2),
+              autosyncbuildtemplates: cfg.autosyncbuildtemplates,
+              attrib1name: cfg.attrib1name,
+              attrib2name: cfg.attrib2name,
+              attrib3name: cfg.attrib3name,
+              attrib4name: cfg.attrib4name,
+              attrib5name: cfg.attrib5name,
+              posclientid: cfg.posclientid,
 
-            date: doNiceDateModifiedOrCreated(cfg.datemodified, cfg.datecreated),
-            by: doNiceModifiedBy(cfg.datemodified, cfg.usermodified, cfg.usercreated)
-          };
+              date: doNiceDateModifiedOrCreated(cfg.datemodified, cfg.datecreated),
+              by: doNiceModifiedBy(cfg.datemodified, cfg.usermodified, cfg.usercreated)
+            };
 
           doCustomAttributeLabelName(1, cache_config.attrib1name);
           doCustomAttributeLabelName(2, cache_config.attrib2name);
@@ -1268,28 +1170,25 @@ function doPrimus()
           doCustomAttributeLabelName(4, cache_config.attrib4name);
           doCustomAttributeLabelName(5, cache_config.attrib5name);
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     doAddPrimusListener
-    (
+      (
       'listprinttemplates',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_printtemplates = [];
 
           data.rs.forEach
-          (
-            function(t)
-            {
+            (
+            function (t) {
               cache_printtemplates.push
-              (
+                (
                 {
                   id: doNiceId(t.id),
                   name: doNiceString(t.name),
@@ -1299,14 +1198,14 @@ function doPrimus()
                   date: doNiceDateModifiedOrCreated(t.datemodified, t.datecreated),
                   by: doNiceModifiedBy(t.datemodified, t.usermodified, t.usercreated)
                 }
-              );
+                );
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     // Product category requests
     doAddPrimusListener('loadproductcategory');
@@ -1317,20 +1216,17 @@ function doPrimus()
     doAddPrimusListener('checkproductcategorycode');
 
     doAddPrimusListener
-    (
+      (
       'listproductcategories',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_productcategories = [];
 
           data.rs.forEach
-          (
-            function(p)
-            {
+            (
+            function (p) {
               var name = doNiceTitleizeString(p.name);
               var node =
               {
@@ -1348,39 +1244,35 @@ function doPrimus()
 
               if (_.isUN(p.parentid))
                 cache_productcategories.push(node);
-              else
-              {
+              else {
                 var parent = doFindParentNode(cache_productcategories, p.parentid);
                 // Find parent...
                 if (!_.isUN(parent))
                   parent.children.push(node);
               }
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     // Product requests
     doAddPrimusListener
-    (
+      (
       'listproducts',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_products = [];
 
           data.rs.forEach
-          (
-            function(p)
-            {
+            (
+            function (p) {
               cache_products.push
-              (
+                (
                 {
                   id: doNiceId(p.id),
                   productcategoryid: doNiceId(p.productcategoryid),
@@ -1418,30 +1310,27 @@ function doPrimus()
                   date: doNiceDateModifiedOrCreated(p.datemodified, p.datecreated),
                   by: doNiceModifiedBy(p.datemodified, p.usermodified, p.usercreated)
                 }
-              );
+                );
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     doAddPrimusListener
-    (
+      (
       'listproductsbycategory',
-      function(eventname, data)
-      {
-        if (!_.isUN(data.rs))
-        {
+      function (eventname, data) {
+        if (!_.isUN(data.rs)) {
           cache_productsbycategory = [];
 
           data.rs.forEach
-          (
-            function(p)
-            {
+            (
+            function (p) {
               cache_productsbycategory.push
-              (
+                (
                 {
                   id: doNiceId(p.id),
                   productcategoryid: doNiceId(p.productcategoryid),
@@ -1479,14 +1368,14 @@ function doPrimus()
                   date: doNiceDateModifiedOrCreated(p.datemodified, p.datecreated),
                   by: doNiceModifiedBy(p.datemodified, p.usermodified, p.usercreated)
                 }
-              );
+                );
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     // Product requests
     doAddPrimusListener('loadproduct');
@@ -1525,20 +1414,17 @@ function doPrimus()
     doAddPrimusListener('buildtemplatesearch');
 
     doAddPrimusListener
-    (
+      (
       'listbuildtemplates',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_buildtemplates = [];
 
           data.rs.forEach
-          (
-            function(p)
-            {
+            (
+            function (p) {
               var name = doNiceString(p.name);
               var node =
               {
@@ -1565,34 +1451,30 @@ function doPrimus()
 
               if (_.isUN(p.parentid))
                 cache_buildtemplates.push(node);
-              else
-              {
+              else {
                 var parent = doFindParentNode(cache_buildtemplates, p.parentid);
                 // Find parent...
                 if (!_.isUN(parent))
                   parent.children.push(node);
               }
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     doAddPrimusListener
-    (
+      (
       'buildtemplategetchildren',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           data.rs.forEach
-          (
-            function(p)
-            {
+            (
+            function (p) {
               var name = doNiceString(p.name);
               var node =
               {
@@ -1619,20 +1501,19 @@ function doPrimus()
 
               if (_.isUN(p.parentid))
                 cache_buildtemplates.push(node);
-              else
-              {
+              else {
                 var parent = doFindParentNode(cache_buildtemplates, p.parentid);
                 // Find parent...
                 if (!_.isUN(parent))
                   parent.children.push(node);
               }
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     // Build template detail requests
     doAddPrimusListener('listproductsbybuildtemplate');
@@ -1649,20 +1530,17 @@ function doPrimus()
     doAddPrimusListener('buildproducttemplate');
 
     doAddPrimusListener
-    (
+      (
       'listproducttemplates',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_producttemplates = [];
 
           data.rs.forEach
-          (
-            function(p)
-            {
+            (
+            function (p) {
               var node =
               {
                 id: doNiceId(p.id),
@@ -1685,20 +1563,19 @@ function doPrimus()
 
               if (_.isUN(p.parentid))
                 cache_producttemplates.push(node);
-              else
-              {
+              else {
                 var parent = doFindParentNode(cache_producttemplates, p.parentid);
                 // Find parent...
                 if (!_.isUN(parent))
                   parent.children.push(node);
               }
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     // Product template detail requests
     doAddPrimusListener('listproductsbytemplate');
@@ -1716,14 +1593,14 @@ function doPrimus()
 
 
     doAddPrimusListener
-    (
+      (
       'listpermissiontemplates',
       function (eventname, data) {
         doUpdateInitTasksProgress();
 
         if (!_.isUN(data.rs)) {
           cache_permissiontemplates = [];
-          
+
           data.rs.forEach
             (
             function (p) {
@@ -1754,7 +1631,7 @@ function doPrimus()
           $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
 
 
@@ -1769,21 +1646,18 @@ function doPrimus()
     doAddPrimusListener('transferinventory');
 
     doAddPrimusListener
-    (
+      (
       'inventoryjournal',
-      function(eventname, data)
-      {
-        if (!_.isUN(data.rs))
-        {
+      function (eventname, data) {
+        if (!_.isUN(data.rs)) {
           cache_invstock = [];
 
           data.rs.forEach
-          (
-            function(i)
-            {
+            (
+            function (i) {
               // Real inventory entries append to list of locations we just populated...
               cache_invstock.push
-              (
+                (
                 {
                   id: i.id,
                   locationid: doNiceId(i.locationid),
@@ -1801,55 +1675,50 @@ function doPrimus()
                   created: doNiceDate(i.datecreated),
                   by: doNiceTitleizeString(i.usercreated)
                 }
-              );
+                );
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     doAddPrimusListener
-    (
+      (
       'getinventoryproducttotals',
-      function(evntname, data)
-      {
-        if (!_.isUN(data.total))
-        {
+      function (evntname, data) {
+        if (!_.isUN(data.total)) {
           var selectedproductid = doGetDropDownListValue('fldInventoryProduct');
 
           if (!_.isUN(selectedproductid) && (data.total.productid == selectedproductid))
             $('#spnInventoryQty').html('<strong>Total</strong> in inventory: ' + _.formatnumber(data.total.qty, 4));
         }
       }
-    );
+      );
 
     doAddPrimusListener
-    (
+      (
       'getinventoryproductlocationtotals',
-      function(eventname, data)
-      {
-        if (!_.isUN(data.rs))
-        {
+      function (eventname, data) {
+        if (!_.isUN(data.rs)) {
           var loc = '';
           var html = '<table border="0" cellpadding="2" style="color: #888; font-style: italic; font-size: small">';
 
           data.rs.forEach
-          (
-            function(t)
-            {
+            (
+            function (t) {
               // No assigned location?
               loc = _.isUN(t.locationid) ? '' : t.locationname;
               html += '<tr><td align="left">' + loc + ':</td><td align="right">' + _.formatnumber(t.qty, 4) + '</td></tr>';
             }
-          );
+            );
 
           html += '</table>';
           $('#spnInventoryLocationQty').html(html);
         }
       }
-    );
+      );
 
     // Build requests
     doAddPrimusListener('listbuilds');
@@ -1869,22 +1738,19 @@ function doPrimus()
     doAddPrimusListener('saveporder');
     doAddPrimusListener('completeporder');
     doAddPrimusListener
-    (
+      (
       'listporders',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doUpdateInitTasksProgress();
 
-        if (!_.isUN(data.rs))
-        {
+        if (!_.isUN(data.rs)) {
           cache_porders = [];
 
           data.rs.forEach
-          (
-            function(o)
-            {
+            (
+            function (o) {
               cache_porders.push
-              (
+                (
                 {
                   id: doNiceId(o.id),
                   clientid: doNiceId(o.clientid),
@@ -1918,14 +1784,14 @@ function doPrimus()
                   date: doNiceDateModifiedOrCreated(o.datemodified, o.datecreated),
                   by: doNiceModifiedBy(o.datemodified, o.usermodified, o.usercreated)
                 }
-              );
+                );
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     // POrder detail requests
     doAddPrimusListener('listporderdetails');
@@ -1975,12 +1841,10 @@ function doPrimus()
     doAddPrimusListener('tpcccreateproductfrombuildtemplate');
 
     doAddPrimusListener
-    (
+      (
       'tpccprintjobsheet',
-      function(eventname, data)
-      {
-        if (!_.isUN(data.jobsheetno))
-        {
+      function (eventname, data) {
+        if (!_.isUN(data.jobsheetno)) {
           var url = '/js?no=' + data.jobsheetno + '&fguid=' + fguid;
           var w = window.open(url, '_blank');
 
@@ -1988,7 +1852,7 @@ function doPrimus()
             w.print();
         }
       }
-    );
+      );
 
     // Order detail requests
     doAddPrimusListener('neworderdetail');
@@ -1996,20 +1860,17 @@ function doPrimus()
     doAddPrimusListener('expireorderdetail');
 
     doAddPrimusListener
-    (
+      (
       'listorderdetails',
-      function(eventname, data)
-      {
-        if (!_.isUN(data.rs))
-        {
+      function (eventname, data) {
+        if (!_.isUN(data.rs)) {
           cache_orderproducts = [];
 
           data.rs.forEach
-          (
-            function(p)
-            {
+            (
+            function (p) {
               cache_orderproducts.push
-              (
+                (
                 {
                   id: doNiceId(p.id),
                   productid: doNiceId(p.productid),
@@ -2023,14 +1884,14 @@ function doPrimus()
                   date: doNiceDateModifiedOrCreated(p.datemodified, p.datecreated),
                   by: doNiceModifiedBy(p.datemodified, p.usermodified, p.usercreated)
                 }
-              );
+                );
             }
-          );
+            );
 
-          $('#divEvents').trigger(eventname, {data: data, pdata: $.extend(data.pdata, {})});
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-    );
+      );
 
     // Gov requests
     doAddPrimusListener('abnlookup');
@@ -2062,41 +1923,38 @@ function doPrimus()
     // Server notification events... usually a broadcast of results from server requests...
     // ************************************************************************************************************************************************************************************************
     doAddPrimusListener
-    (
+      (
       'eventerror',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         showIdle();
-        if (!_.isUN(data.rc) && !_.isUN(data.msg))
-        {
-          switch (parseInt(data.rc))
-          {
+        if (!_.isUN(data.rc) && !_.isUN(data.msg)) {
+          switch (parseInt(data.rc)) {
             case errcode_nodata:
-            {
-              noty({text: 'No data or no matching data', type: 'information', timeout: 4000});
-              break;
-            }
+              {
+                noty({ text: 'No data or no matching data', type: 'information', timeout: 4000 });
+                break;
+              }
             case errcode_notloggedin:
-            {
-              // Ignore...
-              break;
-            }
+              {
+                // Ignore...
+                break;
+              }
             case errcode_usernotregistered:
             case errcode_invalidlogin:
-            {
-              noty({text: 'Login failed, please try again', type: 'error', timeout: 4000, force: true, killer: true});
-              $('#fldUid').focus();
-              break;
-            }
+              {
+                noty({ text: 'Login failed, please try again', type: 'error', timeout: 4000, force: true, killer: true });
+                $('#fldUid').focus();
+                break;
+              }
             default:
-            {
-              noty({text: 'Error ' + data.rc + ': ' + data.msg, type: 'error', timeout: 10000});
-              break;
-            }
+              {
+                noty({ text: 'Error ' + data.rc + ': ' + data.msg, type: 'error', timeout: 10000 });
+                break;
+              }
           }
         }
       }
-    );
+      );
 
     // Account events
     doAddPrimusListenerEmitter('accountcreated', 'listaccounts');
@@ -2273,54 +2131,49 @@ function doPrimus()
 
     // Data events
     doAddPrimusListener
-    (
+      (
       'accountsimported',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doShowSuccess('Imported account file: ' + data.filename + ', #Inserted: ' + data.numinserted + ', #Updated: ' + data.numupdated + ', #Skipped: ' + data.numskipped);
-        doServerMessage('listaccounts', {type: 'refresh'});
+        doServerMessage('listaccounts', { type: 'refresh' });
       }
-    );
+      );
 
     doAddPrimusListener
-    (
+      (
       'employeesimported',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doShowSuccess('Imported employees file: ' + data.filename + ', #Inserted: ' + data.numinserted + ', #Updated: ' + data.numupdated + ', #Skipped: ' + data.numskipped);
-        doServerMessage('listemployees', {type: 'refresh'});
+        doServerMessage('listemployees', { type: 'refresh' });
       }
-    );
+      );
 
     doAddPrimusListener
-    (
+      (
       'clientsimported',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doShowSuccess('Imported clients file: ' + data.filename + ', #Inserted: ' + data.numinserted + ', #Updated: ' + data.numupdated + ', #Skipped: ' + data.numskipped);
-        doServerMessage('listclients', {type: 'refresh'});
+        doServerMessage('listclients', { type: 'refresh' });
       }
-    );
+      );
 
     doAddPrimusListener
-    (
+      (
       'suppliersimported',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doShowSuccess('Imported suppliers file: ' + data.filename + ', #Inserted: ' + data.numinserted + ', #Updated: ' + data.numupdated + ', #Skipped: ' + data.numskipped);
-        doServerMessage('listsuppliers', {type: 'refresh'});
+        doServerMessage('listsuppliers', { type: 'refresh' });
       }
-    );
+      );
 
     doAddPrimusListener
-    (
+      (
       'productsimported',
-      function(eventname, data)
-      {
+      function (eventname, data) {
         doShowSuccess('Imported products file: ' + data.filename + ', #Inserted: ' + data.numinserted + ', #Updated: ' + data.numupdated + ', #Skipped: ' + data.numskipped);
-        doServerMessage('listproducts', {type: 'refresh'});
+        doServerMessage('listproducts', { type: 'refresh' });
       }
-    );
+      );
 
     // Rfid events...
     doAddPrimusListener('newrtap');
@@ -2367,8 +2220,7 @@ function doPrimus()
     console.log('***** Primus initialised...');
   }
 
-  catch (err)
-  {
+  catch (err) {
     console.log('****************** Primus exception: ' + err);
   }
 }
