@@ -18,6 +18,17 @@ var multipart = require('connect-multiparty');
 var cronjob = require('cron').CronJob;
 
 var UglifyJS = require("uglify-js");
+// var minify = require('html-minifier').minify;
+// var result_minifier = minify('routes/index.html', 
+// { 
+//   removeAttributeQuotes: true,
+//   collapseWhitespace: true,
+//   removeComments: true,
+//   removeEmptyAttributes: true,
+//   removeRedundantAttributes: true,
+//   removeScriptTypeAttributes: true,
+//   removeStyleLinkTypeAttributes: true
+// });
 
 // *******************************************************************************************************************************************************************************************
 // Globally avail vars...
@@ -2290,11 +2301,14 @@ function main()
     }
   );
 
+
+
   app.get
   (
     '/',
     function(req, res)
     {
+      
       var indexobj = global.fs.readFileSync(global.path.join(__dirname, 'routes/index.html'));
       var indexhtml = indexobj.toString();
 
