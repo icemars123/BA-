@@ -17,6 +17,8 @@ var cors = require('cors');
 var multipart = require('connect-multiparty');
 var cronjob = require('cron').CronJob;
 
+var UglifyJS = require("uglify-js");
+
 // *******************************************************************************************************************************************************************************************
 // Globally avail vars...
 global.pg = require('pg');
