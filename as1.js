@@ -18,8 +18,9 @@ var multipart = require('connect-multiparty');
 var cronjob = require('cron').CronJob;
 
 var UglifyJS = require("uglify-js");
+
 // var minify = require('html-minifier').minify;
-// var result_minifier = minify('routes/index.html', 
+// var result_minifier = minify('<p title="blah" id="moo">foo   </p>', 
 // { 
 //   removeAttributeQuotes: true,
 //   collapseWhitespace: true,
@@ -29,6 +30,8 @@ var UglifyJS = require("uglify-js");
 //   removeScriptTypeAttributes: true,
 //   removeStyleLinkTypeAttributes: true
 // });
+// console.log(result_minifier);
+
 
 // *******************************************************************************************************************************************************************************************
 // Globally avail vars...
