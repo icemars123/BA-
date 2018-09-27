@@ -113,14 +113,12 @@
   <script type="text/javascript" src="jsm/dlg-build-template-search.min.js"></script>
   <script type="text/javascript" src="jsm/dlg-user-new.min.js"></script>
   <script type="text/javascript" src="jsm/dlg-taxcode-new.min.js"></script>
-  <!-- need forcing compressed -->
-  <script type="text/javascript" src="dlg-superfund-new.js"></script> 
+  <script type="text/javascript" src="jsm/dlg-superfund-new.min.js"></script> 
   <script type="text/javascript" src="jsm/dlg-client-new.min.js"></script>
   <script type="text/javascript" src="jsm/dlg-client-search.min.js"></script>
   <script type="text/javascript" src="jsm/dlg-supplier-new.min.js"></script>
   <script type="text/javascript" src="jsm/dlg-employee-new.min.js"></script>
-  <!-- need forcing compressed -->
-  <script type="text/javascript" src="dlg-location-new.js"></script>
+  <script type="text/javascript" src="jsm/dlg-location-new.min.js"></script>
   <script type="text/javascript" src="jsm/dlg-journal-new.min.js"></script>
   <script type="text/javascript" src="jsm/dlg-alert-new.min.js"></script>
   <script type="text/javascript" src="jsm/dlg-pick-abn.min.js"></script>
@@ -149,8 +147,7 @@
 
   <!-- ************************************************************************************************************************************************************************** -->
   <!-- TPCC specific dialogs... -->
-  <!-- need forcing compressed -->
-  <script type="text/javascript" src="dlg-tpcc-jobsheet.js"></script>
+  <script type="text/javascript" src="jsm/dlg-tpcc-jobsheet.min.js"></script>
   <script type="text/javascript" src="jsm/dlg-tpcc-usedproductcodes.min.js"></script>
   <script type="text/javascript" src="jsm/dlg-tpcc-jobsearch.min.js"></script>
   <script type="text/javascript" src="jsm/dz-tpcc-jobsheets.min.js"></script>
@@ -706,6 +703,12 @@
     <div onclick="doContextMenu('pricingpopup', 'new')" data-options="iconCls: 'icon-add'">Add</div>
     <div onclick="doContextMenu('pricingpopup', 'edit')" data-options="iconCls: 'icon-edit'">Edit</div>
     <div onclick="doContextMenu('pricingpopup', 'remove')" data-options="iconCls: 'icon-remove'">Remove</div>
+  </div>
+
+  <div id="divProductImagesMenuPopup" class="easyui-menu" style="width: 120px; display: none;">
+    <div onclick="doContextMenu('productimagespopup', 'edit')" data-options="iconCls: 'icon-edit'">Edit</div>
+    <div onclick="doContextMenu('productimagespopup', 'remove')" data-options="iconCls: 'icon-remove'">Remove</div>
+    <div onclick="doContextMenu('productimagespopup', 'download')" data-options="iconCls: 'icon-download'">Download</div>
   </div>
 
   <div id="divInventoryBuildsMenuPopup" class="easyui-menu" style="width: 120px; display: none;">
@@ -3057,6 +3060,21 @@
         </div>
 
         <div title="Images" data-options="iconCls: 'icon-camera'">
+          <table>
+            <tr>
+              <td>Description:</td>
+              <td><div id="fldNewProductImageDescription" class="easyui-textbox" data-options="iconCls: 'icon-comments', iconAlign: 'right'" style="width: 250px;"></div></td>
+            </tr>
+            <tr>
+              <td>Thumbnail:</td>
+              <td><input id="cbNewProductImageThumbnail" class="easyui-switchbutton" data-options="onText: 'Yes', offText: 'No', width: 80, checked: false"></td>
+            </tr>
+            <tr>
+              <td>Dropzone:</td>
+              <td><div class="dropzone" id="divNewProductImageFile"></div></td>
+            </tr>
+          </table>
+          <div id="divNewProductImagesG" style="width: 100%; height: 85%;"></div>
         </div>
       </div>
     </div>
@@ -3647,6 +3665,18 @@
       <a href="javascript:void(0)" id="tbPricingRemove" onClick="doContextMenu('pricingpopup', 'remove')" class="easyui-linkbutton" iconCls="icon-remove">Remove</a>
     </div>
   </div>
+
+  <div id="tbProductImages" style="height: auto; display: none">
+    <div style="margin-bottom: 5px">
+      <a href="javascript:void(0)" id="tbProductImageClear" onClick="doContextMenu('productimagespopup', 'clear')" class="easyui-linkbutton" iconCls="icon-clear">Clear</a>
+      <a href="javascript:void(0)" id="tbProductImageEdit" onClick="doContextMenu('productimagespopup', 'edit')" class="easyui-linkbutton" iconCls="icon-edit">Edit</a>
+      <a href="javascript:void(0)" id="tbProductImageCancel" onClick="doContextMenu('productimagespopup', 'cancel')" class="easyui-linkbutton" iconCls="icon-cancel">Cancel</a>
+      <a href="javascript:void(0)" id="tbProductImageSave" onClick="doContextMenu('productimagespopup', 'save')" class="easyui-linkbutton" iconCls="icon-save">Save</a>
+      <a href="javascript:void(0)" id="tbProductImageRemove" onClick="doContextMenu('productimagespopup', 'remove')" class="easyui-linkbutton" iconCls="icon-remove">Remove</a>
+      <a href="javascript:void(0)" id="tbProductImageDownload" onClick="doContextMenu('productimagespopup', 'download')" class="easyui-linkbutton" iconCls="icon-download">Download</a>
+    </div>
+  </div>
+
 
   <div id="tbClients" style="height: auto; display: none">
     <div style="margin-bottom: 5px">

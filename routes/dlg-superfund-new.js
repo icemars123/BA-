@@ -71,7 +71,8 @@ function doDlgSuprfundNew()
             var name = $('#fldNewSuperfundName').textbox('getValue');
 
             if (!_.isBlank(name))
-              doServerDataMessage('newsuperfund', {session, name: name}, {type: 'refresh'});
+              // doServerDataMessage('newsuperfund', {session, name: name}, {type: 'refresh'});
+              doServerDataMessage('newsuperfund', { name: name }, { type: 'refresh' });
             else
               doMandatoryTextbox('Please enter name of super fund', 'fldNewSuperfundName');
           }

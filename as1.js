@@ -2920,6 +2920,12 @@ function main()
       addListener('saveproductpricing',                   'saveproductpricing',                   global.modproducts.SaveProductPricing,                 ['*priceid', '*productid', '*price', 'clientid', 'minqty', 'maxqty', 'price1', 'price2', 'price3', 'price4', 'price5']);
       addListener('expireproductpricing',                 'expireproductpricing',                 global.modproducts.ExpireProductPricing,               ['*priceid']);
 
+      // Product image requests
+      addListener('listproductimages',                    'listproductimages',                    global.modproducts.ListProductImages,                  ['*productid']);
+      addListener('saveproductimage',                     'saveproductimage',                     global.modproducts.SaveProductImage,                   ['*productimageid', '*description', '*isthumbnail']);
+      addListener('expireproductimage',                   'expireproductimage',                   global.modproducts.ExpireProductImage,                 ['*productimageid']);
+      addListener('getproductthumbnail',                  'getproductthumbnail',                  global.modtpcc.GetProductThumbnail,                    ['*productid']);
+
       // Build template requests
       addListener('listbuildtemplates',                   'listbuildtemplates',                   global.modproducts.ListBuildTemplates,                 []);
       addListener('listbuildtemplateroots',               'listbuildtemplateroots',               global.modproducts.ListBuildTemplateRoots,             []);

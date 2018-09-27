@@ -1,8 +1,14 @@
+var selectedProductIdImageId = null;
+
 function doDlgProductNew(productcategoryid, productid)
 {
   var isnew = _.isUndefined(productid) || _.isNull(productid);
   var product = {};
   var editingIndex = null;
+
+  // For product images
+  var imageIndex = null;
+  var title = '';
 
   function doReset()
   {
@@ -316,6 +322,134 @@ function doDlgProductNew(productcategoryid, productid)
     }
   }
 
+  function doImageClear() 
+  {
+    $('#divNewProductImagesG').datagrid('clearSelections');
+  }
+
+  function doImageEdit() 
+  {
+    doGridStartEdit
+    (
+      'divNewProductImagesG',
+      editingIndex,
+      function (row, index) 
+      {
+        imageIndex = index;
+
+        doGridGetEditor
+        (
+          'divNewProductImagesG',
+          imageIndex,
+          'description',
+          function (ed) 
+          {
+          }
+        );
+      }
+    );
+  }
+
+  function doImageCancel() 
+  {
+    imageIndex = doGridCancelEdit('divNewProductImagesG', editingIndex);
+  }
+
+  function doImageSave() 
+  {
+    doGridEndEditGetRow
+    (
+      'divNewProductImagesG',
+      imageIndex,
+      function (row) 
+      {
+        doServerDataMessage
+        (
+          'saveproductimage', 
+          { 
+            productimageid: row.id, 
+            description: row.description, 
+            isthumbnail: row.isthumbnail 
+          }, 
+          { type: 'refresh' }
+        );
+      }
+    );
+
+    imageIndex = null;
+  }
+
+  function doImageRemove() 
+  {
+    if (!doGridGetSelectedRowData
+      (
+      'divNewProductImagesG',
+      function (row) 
+      {
+        doPromptOkCancel
+        (
+          'Remove image ' + row.description + '?',
+          function (result) 
+          {
+            if (result)
+              doServerDataMessage('expireproductimage', { productimageid: row.id }, { type: 'refresh' });
+          }
+        );
+      }
+      )) 
+    {
+      doShowError('Please select an image to remove');
+    }
+  }
+
+  function doImageDownload() 
+  {
+    doGridGetSelectedRowData
+    (
+      'divNewProductImagesG',
+      function (row) 
+      {
+        doThrowProductImage(row.id);
+      }
+    );
+  }
+
+  function doImageSaved(ev, args) 
+  {
+    if (productid == args.data.productid)
+      doServerDataMessage('listproductimages', { productid: productid }, { type: 'refresh' });
+  }
+
+  function doImageList(ev, args) 
+  {
+    var data = [];
+
+    args.data.rs.forEach
+    (
+      function (a) 
+      {
+        var image = _.isNull(a.image) || _.isUndefined(a.image) ? '' : '<image src="' + a.image + '" width="35px">';
+
+        data.push
+        (
+          {
+            id: doNiceId(a.id),
+            name: doNiceString(a.name),
+            description: doNiceString(a.description),
+            mimetype: '<a href="javascript:void(0);" onClick="doThrowProductImage(' + a.id + ');">' + mapMimeTypeToImage(a.mimetype) + '</a>',
+            size: doNiceString(a.size),
+            isthumbnail: a.isthumbnail,
+            image: image,
+            date: doNiceDateModifiedOrCreated(a.datemodified, a.datecreated),
+            by: doNiceModifiedBy(a.datemodified, a.usermodified, a.usercreated)
+          }
+        );
+      }
+    );
+
+    $('#divNewProductImagesG').datagrid('loadData', data);
+  }
+
   function doEventsHandler(ev, args)
   {
     if (args == 'new')
@@ -342,6 +476,22 @@ function doDlgProductNew(productcategoryid, productid)
       doPricingRemove();
   }
 
+  function doImageEventsHandler(ev, args) 
+  {
+    if (args == 'clear')
+      doImageClear();
+    else if (args == 'edit')
+      doImageEdit();
+    else if (args == 'cancel')
+      doImageCancel();
+    else if (args == 'save')
+      doImageSave();
+    else if (args == 'remove')
+      doImageRemove();
+    else if (args == 'download')
+      doImageDownload();
+  }
+
   $('#divEvents').on('checkproductcode', doCheckCode);
   $('#divEvents').on('newproduct', doSaved);
   $('#divEvents').on('saveproduct', doSaved);
@@ -361,6 +511,7 @@ function doDlgProductNew(productcategoryid, productid)
 
   $('#divEvents').on('productcodepopup', doEventsHandler);
   $('#divEvents').on('pricingpopup', doPricingEventsHandler);
+  $('#divEvents').on('productimagespopup', doImageEventsHandler);
 
   $('#dlgProductNew').dialog
   (
@@ -386,11 +537,14 @@ function doDlgProductNew(productcategoryid, productid)
 
         $('#divEvents').off('productcodepopup', doEventsHandler);
         $('#divEvents').off('pricingpopup', doPricingEventsHandler);
+        $('#divEvents').off('productimagespopup', doImageEventsHandler);
 
         $('#svgNewProductBarcode').empty();
       },
       onOpen: function()
       {
+        selectedProductIdImageId = productid
+
         $('#fldNewProductCode').textbox
         (
           {
@@ -699,6 +853,57 @@ function doDlgProductNew(productcategoryid, productid)
           }
         );
 
+        $('#divNewProductImagesG').datagrid
+        (
+          {
+            idField: 'id',
+            fitColumns: true,
+            singleSelect: true,
+            rownumbers: false,
+            striped: true,
+            toolbar: '#tbProductImages',
+            columns:
+              [
+                [
+                  { title: 'Name', field: 'name', width: 200, align: 'left', resizable: true },
+                  { title: 'Description', field: 'description', width: 300, align: 'left', resizable: true, editor: 'text' },
+                  { title: 'Type', field: 'mimetype', width: 100, align: 'center', resizable: true },
+                  { title: 'Size', field: 'size', width: 150, align: 'right', resizable: true, formatter: function (value, row) { return filesize(value, { base: 10 }); } },
+                  { title: 'Thumbnail', field: 'isthumbnail', width: 150, align: 'center', resizable: true, editor: { type: 'checkbox', options: { on: 1, off: 0 } }, formatter: function (value, row) { return mapBoolToImage(value); } },
+                  { title: 'Image', field: 'image', width: 50, align: 'center', resizable: true },
+                  { title: 'Modified', field: 'date', width: 150, align: 'right', resizable: true },
+                  { title: 'By', field: 'by', width: 200, align: 'left', resizable: true }
+                ]
+              ],
+            onRowContextMenu: function (e, index, row) 
+            {
+              doGridContextMenu('divNewProductImagesG', 'divProductImagesMenuPopup', e, index, row);
+            },
+            onDblClickCell: function (index, field, value) 
+            {
+              doGridStartEdit
+              (
+                'divNewProductImagesG',
+                imageIndex,
+                function (row, index) 
+                {
+                  imageIndex = index;
+
+                  doGridGetEditor
+                  (
+                    'divNewProductImagesG',
+                    imageIndex,
+                    'description',
+                    function (ed) 
+                    {
+                    }
+                  );
+                }
+              );
+            }
+          }
+        );
+
         $('#newproducttabs').tabs
         (
           {
@@ -716,6 +921,7 @@ function doDlgProductNew(productcategoryid, productid)
           doServerDataMessage('loadproduct', {productid: productid}, {type: 'refresh'});
           doServerDataMessage('listproductcodes', {productid: productid}, {type: 'refresh'});
           doServerDataMessage('listproductpricing', {productid: productid}, {type: 'refresh'});
+          doServerDataMessage('listproductimages', { productid: productid }, { type: 'refresh' });
         }
         else
           doReset();

@@ -407,7 +407,7 @@ function doDlgJobSheet(jobsheetid)
 
     if (results.across == 0)
     {
-      $('#fldReelWidth').numberbox('clear',);
+      $('#fldReelWidth').numberbox('clear');
       $('#fldThickness').numberbox('clear');
       $('#fldGear').numberbox('clear');
       $('#fldSleeveSize').numberbox('clear');

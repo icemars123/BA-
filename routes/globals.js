@@ -1341,6 +1341,14 @@ function doThrowClientAttachment(clientattachmentid)
   a.click();
 }
 
+function doThrowProductImage(productimageid) 
+{
+  var a = $('#ancSpare').get(0);
+  a.target = '_blank';
+  a.href = '/throwproductimage?productimageid=' + productimageid + '&uuid=' + uuid;
+  a.click();
+}
+
 function doThrowPrintTemplate(printtemplateid)
 {
   var a = $('#ancSpare').get(0);
