@@ -24,8 +24,6 @@ var myperms =
   cancreatepayroll: 0,
   canviewproducts: 0,
   cancreateproducts: 0,
-  canviewclients: 0,
-  cancreateclients: 0,
   canviewcodes: 0,
   cancreatecodes: 0,
   canviewclients: 0,

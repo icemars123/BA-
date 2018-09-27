@@ -4,7 +4,7 @@ module.exports = function (grunt) {
         // define source files and their destinations
         uglify: {
             files: {
-                src: 'routes/*.js',  // source files mask
+                src: 'routes/dlg-product-new.js',  // source files mask
                 dest: 'routes/jsm/',    // destination folder
                 expand: true,    // allow dynamic building
                 flatten: true,   // remove all unnecessary nesting
