@@ -2924,7 +2924,7 @@ function main()
       addListener('listproductimages',                    'listproductimages',                    global.modproducts.ListProductImages,                  ['*productid']);
       addListener('saveproductimage',                     'saveproductimage',                     global.modproducts.SaveProductImage,                   ['*productimageid', '*description', '*isthumbnail']);
       addListener('expireproductimage',                   'expireproductimage',                   global.modproducts.ExpireProductImage,                 ['*productimageid']);
-      addListener('getproductthumbnail',                  'getproductthumbnail',                  global.modtpcc.GetProductThumbnail,                    ['*productid']);
+      addListener('getproductthumbnail',                  'getproductthumbnail',                  global.modproducts.GetProductThumbnail,                    ['*productid']);
 
       // Build template requests
       addListener('listbuildtemplates',                   'listbuildtemplates',                   global.modproducts.ListBuildTemplates,                 []);

@@ -3243,6 +3243,20 @@ function doExpireProductCode(tx, world)
   return promise;
 }
 
+function doSaveProductImage(tx, world) 
+{
+  var promise = new global.rsvp.Promise();
+
+  return promise;
+}
+
+function doExpireProductImagee(tx, world) 
+{
+  var promise = new global.rsvp.Promise();
+  
+  return promise;
+}
+
 // *******************************************************************************************************************************************************************************************
 // Public functions
 function ListProductCategories(world)
@@ -8382,6 +8396,136 @@ function ExpireProductCode(world)
   );
 }
 
+function ListProductImages(world) 
+{  
+}
+
+function SaveProductImage(world) 
+{
+  var msg = '[' + world.eventname + '] ';
+  //
+  global.pg.connect
+  (
+    global.cs,
+    function (err, client, done) 
+    {
+      if (!err) 
+      {
+        var tx = new global.pgtx(client);
+        tx.begin
+        (
+          function (err) 
+          {
+            if (!err) 
+            {
+              doSaveProductImage(tx, world).then
+              (
+                function (result) 
+                {
+                  tx.commit
+                  (
+                    function (err) 
+                    {
+                      if (!err) 
+                      {
+                        done();
+                        world.spark.emit
+                        (
+                          world.eventname, 
+                          { 
+                            rc: global.errcode_none, 
+                            msg: global.text_success, 
+                            productid: result.productid, 
+                            productimageid: world.productimageid, 
+                            datemodified: result.datemodified, 
+                            usermodified: result.usermodified, 
+                            pdata: world.pdata 
+                          }
+                        );
+                        global.pr.sendToRoomExcept
+                        (
+                          global.custchannelprefix + world.cn.custid, 
+                          'productimagesaved', 
+                          { 
+                            productid: result.productid, 
+                            productimageid: world.productimageid, 
+                            dateexpired: result.dateexpired, 
+                            userexpired: result.userexpired 
+                          }, 
+                          world.spark.id
+                        );
+                      }
+                      else
+                      {
+                        tx.rollback
+                        (
+                          function (ignore) 
+                          {
+                            done();
+                            msg += global.text_tx + ' ' + err.message;
+                            global.log.error({ saveproductimage: true }, msg);
+                            world.spark.emit
+                            (
+                              global.eventerror, 
+                              { 
+                                rc: global.errcode_dberr, 
+                                msg: msg, 
+                                pdata: world.pdata 
+                              }
+                            );
+                          }
+                        );
+                      }  
+                    }
+                  );
+                }
+              ).then
+              (
+                null,
+                function (err) 
+                {
+                  tx.rollback
+                  (
+                    function (ignore) 
+                    {
+                      done();
+
+                      msg += global.text_generalexception + ' ' + err.message;
+                      global.log.error({ saveproductimage: true }, msg);
+                      world.spark.emit(global.eventerror, { rc: global.errcode_fatal, msg: msg, pdata: world.pdata });
+                    }
+                  );
+                }
+              );
+            } 
+            else 
+            {
+              done();
+              msg += global.text_notxstart + ' ' + err.message;
+              global.log.error({ saveproductimage: true }, msg);
+              world.spark.emit(global.eventerror, { rc: global.errcode_dberr, msg: msg, pdata: world.pdata });
+            }  
+          }
+        );
+      }
+      else
+      {
+        global.log.error({ saveproductimage: true }, global.text_nodbconnection);
+        world.spark.emit(global.eventerror, { rc: global.errcode_dbunavail, msg: global.text_nodbconnection, pdata: world.pdata });
+      }
+    }
+  );
+}
+
+function ExpireProductImage(world) 
+{  
+}
+
+function GetProductThumbnail(world) 
+{
+
+}
+
 // *******************************************************************************************************************************************************************************************
 // Internal functions
 module.exports.selectPrice = selectPrice;
@@ -8458,5 +8602,11 @@ module.exports.SaveProductTemplateDetail = SaveProductTemplateDetail;
 module.exports.ExpireProductTemplateDetail = ExpireProductTemplateDetail;
 module.exports.GetProductPrices = GetProductPrices;
 module.exports.GetPrice = GetPrice;
+//For product images
+module.exports.ListProductImages = ListProductImages;
+module.exports.SaveProductImage = SaveProductImage;
+module.exports.ExpireProductImage = ExpireProductImage;
+module.exports.GetProductThumbnail = GetProductThumbnail;
+
 
 
