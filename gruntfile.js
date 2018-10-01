@@ -1,9 +1,13 @@
-module.exports = function (grunt) {
-    grunt.initConfig({
+module.exports = function (grunt) 
+{
+    grunt.initConfig
+    ({
 
         // define source files and their destinations
-        uglify: {
-            files: {
+        uglify: 
+        {
+            files: 
+            {
                 src: 'routes/dlg-product-new.js',  // source files mask
                 dest: 'routes/jsm/',    // destination folder
                 expand: true,    // allow dynamic building
@@ -11,7 +15,8 @@ module.exports = function (grunt) {
                 ext: '.min.js'   // replace .js to .min.js
             }
         },
-        watch: {
+        watch: 
+        {
             js: { files: '*.js', tasks: ['uglify'] },
         }
     });

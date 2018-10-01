@@ -322,6 +322,7 @@ function doDlgProductNew(productcategoryid, productid)
     }
   }
 
+  // Images methods
   function doImageClear() 
   {
     $('#divNewProductImagesG').datagrid('clearSelections');
@@ -429,7 +430,7 @@ function doDlgProductNew(productcategoryid, productid)
       function (a) 
       {
         var image = _.isNull(a.image) || _.isUndefined(a.image) ? '' : '<image src="' + a.image + '" width="35px">';
-
+        console.log("image:" + image);
         data.push
         (
           {
@@ -509,6 +510,13 @@ function doDlgProductNew(productcategoryid, productid)
   $('#divEvents').on('productcodecreated', doNewCode);
   $('#divEvents').on('productcodeexpired', doNewCode);
 
+  $('#divEvents').on('listproductimages', doImageList);
+  $('#divEvents').on('productimagecreated', doImageSaved);
+  $('#divEvents').on('productimagesaved', doImageSaved);
+  $('#divEvents').on('productimageexpired', doImageSaved);
+  $('#divEvents').on('saveproductimage', doImageSaved);
+  $('#divEvents').on('expireproductimage', doImageSaved);
+
   $('#divEvents').on('productcodepopup', doEventsHandler);
   $('#divEvents').on('pricingpopup', doPricingEventsHandler);
   $('#divEvents').on('productimagespopup', doImageEventsHandler);
@@ -534,6 +542,13 @@ function doDlgProductNew(productcategoryid, productid)
         $('#divEvents').off('listproductcodes', doListCodes);
         $('#divEvents').off('productcodecreated', doNewCode);
         $('#divEvents').off('productcodeexpired', doNewCode);
+
+        $('#divEvents').off('listproductimages', doImageList);
+        $('#divEvents').off('productimagecreated', doImageSaved);
+        $('#divEvents').off('productimagesaved', doImageSaved);
+        $('#divEvents').off('productimageexpired', doImageSaved);
+        $('#divEvents').off('saveproductimage', doImageSaved);
+        $('#divEvents').off('expireproductimage', doImageSaved);
 
         $('#divEvents').off('productcodepopup', doEventsHandler);
         $('#divEvents').off('pricingpopup', doPricingEventsHandler);

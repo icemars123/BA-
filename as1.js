@@ -2034,6 +2034,7 @@ function main()
   var dropclientattachments = require('./routes/dropclientattachment');
   var dropsupplierattachments = require('./routes/dropsupplierattachment');
   var droporderattachments = require('./routes/droporderattachment');
+  var dropproductimages = require('./routes/dropproductimage');
   var dropprinttemplates = require('./routes/dropprinttemplate');
   var dropdataimport = require('./routes/dropdataimport');
 
@@ -2042,6 +2043,7 @@ function main()
   var throwclientattachments = require('./routes/throwclientattachment');
   var throwsupplierattachments = require('./routes/throwsupplierattachment');
   var throworderattachments = require('./routes/throworderattachment');
+  var throwproductimages = require('./routes/throwproductimage');
   var throwprinttemplates = require('./routes/throwprinttemplate');
   var rtap = require('./routes/rtap');
 
@@ -2085,6 +2087,16 @@ function main()
     function(req, res)
     {
       droporderattachments.dropOrderAttachmentPost(req, res);
+    }
+  );
+
+  app.post
+  (
+    '/dropproductimage',
+    multipart(),
+    function(req, res)
+    {
+      dropproductimages.dropProductImagePost(req, res);
     }
   );
 
@@ -2427,6 +2439,15 @@ function main()
     function(req, res)
     {
       throworderattachments.throwOrderAttachmentGet(req, res);
+    }
+  );
+
+  app.get
+  (
+    './throwproductimage',
+    function (req, res) 
+    {
+      throwproductimages.throwProductImageGet(req, res); 
     }
   );
 

@@ -1402,6 +1402,12 @@ function doPrimus() {
     doAddPrimusListener('getproductprices');
     doAddPrimusListener('getprice');
 
+    // Product image requests
+    doAddPrimusListener('listproductimages');
+    doAddPrimusListener('saveproductimage');
+    doAddPrimusListener('expireproductimage');
+    doAddPrimusListener('getproductthumbnail');
+
     // Build template requests
     doAddPrimusListener('newbuildtemplate');
     doAddPrimusListener('savebuildtemplate');
@@ -2041,6 +2047,11 @@ function doPrimus() {
     doAddPrimusListener('productpricingcreated');
     doAddPrimusListener('productpricingsaved');
     doAddPrimusListener('productpricingexpired');
+
+    // Product image events
+    doAddPrimusListener('productimagecreated');
+    doAddPrimusListener('productimagesaved');
+    doAddPrimusListener('productimageexpired');
 
     // Build template events
     doAddPrimusListenerEmitter('buildtemplatecreated', 'listbuildtemplates');

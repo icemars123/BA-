@@ -3245,7 +3245,74 @@ function doExpireProductCode(tx, world)
 
 function doSaveProductImage(tx, world) 
 {
-  var promise = new global.rsvp.Promise();
+  var promise = new global.rsvp.Promise
+  (
+    function (resolve, reject) 
+    {
+      tx.query
+      (
+        'update ' + 
+        'productimages ' + 
+        'set ' + 
+        'description=$1,' + 
+        'isthumbnail=$2,' + 
+        'datemodified=now(),' + 
+        'usersmodified_id=$3 ' + 
+        'where ' +  
+        'customers_id=$4 ' + 
+        'and ' + 
+        'id=$5 ' + 
+        'and ' + 
+        'dateexpired is null',
+        [
+          __.sanitiseAsString(world.description),
+          world.isthumbnail,
+          world.cn.userid,
+          world.cn.custid,
+          __.sanitiseAsBigInt(world.productimageid)
+        ],
+        function (err, result) 
+        {
+          if (!err) 
+          {
+            tx.query
+            (
+              'select ' + 
+              'p1.products_id productid,' + 
+              'p1.datemodified, ' + 
+              'u1.name usermodified ' + 
+              'from ' + 
+              'productimages p1 left join users u1 on (p1.usersmodified_id=u1.id) ' + 
+              'where ' + 
+              'p1.customers_id=$1 ' + 
+              'and ' + 
+              'p1.id=$2',
+              [
+                world.cn.custid,
+                __.sanitiseAsBigInt(world.productimageid)
+              ],
+              function (err, result)
+              {
+                if (!err)
+                  resolve
+                  (
+                    { 
+                      productid: result.rows[0].productid, 
+                      datemodified: global.moment(result.rows[0].datemodified).format('YYYY-MM-DD HH:mm:ss'), 
+                      usermodified: result.rows[0].usermodified 
+                    }
+                  );
+                else
+                  reject(err);
+              }
+            );
+          } 
+          else 
+            reject(err);
+        }
+      );      
+    }
+  );
 
   return promise;
 }
@@ -3256,6 +3323,237 @@ function doExpireProductImagee(tx, world)
   
   return promise;
 }
+
+function existingProductImage(args, callback) 
+{
+  // We need user id and customer id to validate request
+  // Find user in cache...
+  global.users.get
+  (
+    global.config.redis.prefix + args.uuid,
+    function (err, uuidobj) 
+    {
+      if (!err) 
+      {
+        global.safejsonparse
+        (
+          uuidobj,
+          function (err, uo) 
+          {
+            if (!err) 
+            {
+              global.pg.connect
+              (
+                global.cs,
+                function (err, client, done) 
+                {
+                  if (!err) 
+                  {
+                    client.query
+                    (
+                      'select ' +
+                      'o1.products_id productid,' +
+                      'o1.name,' +
+                      'o1.size ' +
+                      'from ' +
+                      'productimages p1 ' +
+                      'where ' +
+                      'p1.customers_id=$1 ' +
+                      'and ' +
+                      'p1.id=$2',
+                      [
+                        uo.custid,
+                        args.productimageid
+                      ],
+                      function (err, result) 
+                      {
+                        done();
+
+                        if (!err)
+                          callback
+                          (
+                            null, 
+                            { 
+                              productid: result.rows[0].productid, 
+                              name: result.rows[0].name, 
+                              size: result.rows[0].size 
+                            }
+                          );
+                        else 
+                        {
+                          global.log.error({ existingproductimage: true }, global.text_generalexception + ' ' + err.message);
+                          callback(err, null);
+                        }
+                      }
+                    );
+                  } 
+                  else 
+                  {
+                    global.log.error({ existingproductimage: true }, global.text_nodbconnection);
+                    callback(err, null);
+                  }
+                }
+              );
+            } else 
+              callback(err, null);
+          }
+        );
+      } else 
+        callback(err, null);
+    }
+  );
+
+}
+
+function newProductImage(args, callback) 
+{
+  global.pg.connect
+  (
+    global.cs,
+    function (err, client, done) 
+    {
+      if (!err) 
+      {
+        var tx = new global.pgtx(client);
+        tx.begin
+        (
+          function (err) 
+          {
+            if (!err) 
+            {
+              // We need user id and customer id to insert new entry...
+              // Find user in cache...
+              global.users.get
+              (
+                global.config.redis.prefix + args.uuid,
+                function (err, uuidobj) 
+                {
+                  if (!err) 
+                  {
+                    global.safejsonparse
+                    (
+                      uuidobj,
+                      function (err, uo) 
+                      {
+                        if (!err)
+                        {
+                          tx.query
+                          (
+                            'insert into productimages (customers_id,products_id,name,description,mimetype,size,isthumbnail,userscreated_id) values ($1,$2,$3,$4,$5,$6,$7,$8) returning id',
+                            [
+                              uo.custid,
+                              args.productid,
+                              args.filename,
+                              args.description,
+                              args.mimetype,
+                              args.size,
+                              args.isthumbnail,
+                              uo.userid
+                            ],
+                            function (err, result) 
+                            {
+                              if (!err) 
+                              {
+                                tx.commit
+                                (
+                                  function (err, ret) 
+                                  {
+                                    if (!err)
+                                    {
+                                      done();
+
+                                      if (result.rows.length == 1) 
+                                      {
+                                        var productimageid = result.rows[0].id;
+                                        //
+                                        callback(null, productimageid);
+                                        global.pr.sendToRoom
+                                        (
+                                          global.custchannelprefix + uo.custid, 
+                                          'productimagecreated', 
+                                          { 
+                                            productid: args.productid, 
+                                            productimageid: productimageid 
+                                          }
+                                        );
+                                      }
+                                    }
+                                    else 
+                                    {
+                                      tx.rollback
+                                      (
+                                        function (ignore) 
+                                        {
+                                          done();
+                                          global.log.error({ newproductimage: true }, global.text_committx + ' ' + err.message);
+                                          callback(err, null);
+                                        }
+                                      );
+                                    }
+                                  }
+                                );
+                              }
+                              else 
+                              {
+                                tx.rollback
+                                (
+                                  function (ignore) 
+                                  {
+                                    done();
+                                    global.log.error({ newproductimage: true }, global.text_dbexception + ' ' + err.message);
+                                    callback(err, null);
+                                  }
+                                );
+                              }
+                            }
+                          );
+                        }
+                        else 
+                        {
+                          tx.rollback
+                          (
+                            function (ignore) 
+                            {
+                              done();
+                              global.log.error({ newproductimage: true }, global.text_unablegetidfromuuid + ' ' + err.message);
+                              callback(err, null);
+                            }
+                          );
+                        }
+                      }
+                    );
+                  }
+                  else 
+                  {
+                    tx.rollback
+                    (
+                      function (ignore)
+                      {
+                        done();
+                        global.log.error({ newproductimage: true }, global.text_unablegetidfromuuid + ' ' + err.message);
+                        callback(err, null);
+                      }
+                    );
+                  }
+                }
+              );
+            } 
+            else 
+            {
+              done();
+              msg += global.text_notxstart + ' ' + err.message;
+              global.log.error({ newproductimage: true }, msg);  
+            }  
+          }
+        );
+      } 
+      else 
+        global.log.error({ newproductimage: true }, global.text_nodbconnection);
+    }
+  );
+}
+
+
 
 // *******************************************************************************************************************************************************************************************
 // Public functions
@@ -8398,6 +8696,91 @@ function ExpireProductCode(world)
 
 function ListProductImages(world) 
 {  
+  var msg = '[' + world.eventname + '] ';
+  //
+  global.pg.connect
+  (
+    global.cs,
+    function (err, client, done) 
+    {
+      if (!err) 
+      {
+        client.query
+        (
+          'select ' +
+          'p1.id,' +
+          'p1.name,' +
+          'p1.description,' +
+          'p1.mimetype,' +
+          'p1.size,' +
+          'p1.isthumbnail,' +
+          'p1.datecreated,' +
+          'p1.datemodified,' +
+          'u1.name usercreated,' +
+          'u2.name usermodified ' +
+          'from ' +
+          'productimages p1 left join users u1 on (p1.userscreated_id=u1.id) ' +
+          '                     left join users u2 on (p1.usersmodified_id=u2.id) ' +
+          'where ' +
+          'p1.customers_id=$1 ' +
+          'and ' +
+          'p1.products_id=$2 ' +
+          'and ' +
+          'p1.dateexpired is null ' +
+          'order by ' +
+          'p1.datecreated desc',
+          [
+            world.cn.custid,
+            __.sanitiseAsBigInt(world.productid)
+          ],
+          function (err, result) 
+          {
+            done();
+
+            if (!err) 
+            {
+              // JS returns date with TZ info/format, need in ISO format...
+              result.rows.forEach
+               (
+                function (p) 
+                {
+                  if (!__.isUN(p.datemodified))
+                    p.datemodified = global.moment(p.datemodified).format('YYYY-MM-DD HH:mm:ss');
+
+                  p.datecreated = global.moment(p.datecreated).format('YYYY-MM-DD HH:mm:ss');
+
+                  if (global.isMimeTypeImage(p.mimetype))
+                    p.image = global.config.folders.productimages + p.id + '_' + world.productid + '_' + p.name;
+                }
+              );
+
+              world.spark.emit
+              (
+                world.eventname, 
+                { 
+                  rc: global.errcode_none, 
+                  msg: global.text_success, 
+                  fguid: world.fguid, 
+                  rs: result.rows, 
+                  pdata: world.pdata 
+                }
+              );
+            }
+            else {
+              msg += global.text_generalexception + ' ' + err.message;
+              global.log.error({ listproductimages: true }, msg);
+              world.spark.emit(global.eventerror, { rc: global.errcode_fatal, msg: msg, pdata: world.pdata });
+            }
+          }
+        );
+      }
+      else 
+      {
+        global.log.error({ listproductimages: true }, global.text_nodbconnection);
+        world.spark.emit(global.eventerror, { rc: global.errcode_dbunavail, msg: global.text_nodbconnection, pdata: world.pdata });
+      }  
+    }
+  );
 }
 
 function SaveProductImage(world) 
@@ -8523,7 +8906,51 @@ function ExpireProductImage(world)
 
 function GetProductThumbnail(world) 
 {
+  var msg = '[' + world.eventname + '] ';
+  //
+  global.pg.connect
+  (
+    global.cs,
+    function (err, client, done) 
+    {
+      if (!err)
+      {
+        client.query
+          (
+          'select ' +
+          'oa1.id ' +
+          'from ' +
+          'orderattachments oa1 ' +
+          'where ' +
+          'oa1.customers_id=$1 ' +
+          'and ' +
+          'oa1.orders_id=$2 ' +
+          'and ' +
+          'oa1.isthumbnail=1',
+          [
+            world.cn.custid,
+            __.sanitiseAsBigInt(world.orderid)
+          ],
+          function (err, result) {
+            done();
 
+            if (!err)
+              world.spark.emit(world.eventname, { rc: global.errcode_none, msg: global.text_success, fguid: world.fguid, orderattachmentid: result.rows[0].id, pdata: world.pdata });
+            else {
+              msg += global.text_generalexception + ' ' + err.message;
+              global.log.error({ getorderthumbnail: true }, msg);
+              world.spark.emit(global.eventerror, { rc: global.errcode_fatal, msg: msg, pdata: world.pdata });
+            }
+          }
+          );
+      }
+      else 
+      {
+        global.log.error({ getorderthumbnail: true }, global.text_nodbconnection);
+        world.spark.emit(global.eventerror, { rc: global.errcode_dbunavail, msg: global.text_nodbconnection, pdata: world.pdata });
+      }
+    }
+  );
 }
 
 // *******************************************************************************************************************************************************************************************
@@ -8531,6 +8958,9 @@ function GetProductThumbnail(world)
 module.exports.selectPrice = selectPrice;
 module.exports.doNewBuildTemplateStep1 = doNewBuildTemplateStep1;
 module.exports.doNewBuildTemplateStep2 = doNewBuildTemplateStep2;
+
+module.exports.newProductImage = newProductImage;
+module.exports.existingProductImage = existingProductImage;
 
 // *******************************************************************************************************************************************************************************************
 // Public functions

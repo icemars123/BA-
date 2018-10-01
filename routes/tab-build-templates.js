@@ -340,9 +340,6 @@ function doBuildTemplatesTabWidgets()
       {
         $(this).treegrid('enableDnd');
       },
-      // onDblClickCell: function(field, row)
-      // {
-      // },
       onBeforeDrag: function(source)
       {
         if (editingId)

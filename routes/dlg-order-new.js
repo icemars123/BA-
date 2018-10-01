@@ -260,7 +260,7 @@ function doDlgOrderNew(isquote, orderid)
       function(a)
       {
         var image = _.isNull(a.image) || _.isUndefined(a.image) ? '' : '<image src="' + a.image + '" width="35px">';
-
+        
         data.push
         (
           {

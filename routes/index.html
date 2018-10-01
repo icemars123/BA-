@@ -90,7 +90,7 @@
   <script type="text/javascript" src="jsm/dlg-product-search.min.js"></script>
   <script type="text/javascript" src="jsm/dlg-product-select-price.min.js"></script>
   <script type="text/javascript" src="jsm/dlg-product-category-new.min.js"></script>
-  <script type="text/javascript" src="jsm/dlg-product-new.min.js"></script>
+  <script type="text/javascript" src="dlg-product-new.js"></script>
   <script type="text/javascript" src="jsm/dlg-template-build.min.js"></script>
   <script type="text/javascript" src="jsm/dlg-email-templates.min.js"></script>
   <script type="text/javascript" src="jsm/dlg-invoice-search.min.js"></script>
@@ -126,6 +126,7 @@
   <script type="text/javascript" src="jsm/dz-client-attachments.min.js"></script>
   <script type="text/javascript" src="jsm/dz-supplier-attachments.min.js"></script>
   <script type="text/javascript" src="jsm/dz-order-attachments.min.js"></script>
+  <script type="text/javascript" src="jsm/dz-product-images.min.js"></script>
   <script type="text/javascript" src="jsm/dz-print-templates.min.js"></script>
   <script type="text/javascript" src="jsm/dz-data-import-products.min.js"></script>
   <script type="text/javascript" src="jsm/dz-data-import-clients.min.js"></script>
@@ -272,6 +273,7 @@
       Dropzone.options.divClientAttachmentFile = false;
       Dropzone.options.divSupplierAttachmentFile = false;
       Dropzone.options.divNewOrderAttachmentFile = false;
+      Dropzone.options.divNewProductImageFile = false;
       Dropzone.options.divDataImportProductsFile = false;
       Dropzone.options.divDataImportClientsFile = false;
       Dropzone.options.divDataImportSuppliersFile = false;
@@ -505,6 +507,7 @@
       doDZClientAttachments();
       doDZSupplierAttachments();
       doDZOrderAttachments();
+      doDZProductImages();
       doDZPrintTemplates();
       doDZDataImportProducts();
       doDZDataImportClients();
