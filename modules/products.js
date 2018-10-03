@@ -3317,9 +3317,72 @@ function doSaveProductImage(tx, world)
   return promise;
 }
 
-function doExpireProductImagee(tx, world) 
+function doExpireProductImage(tx, world) 
 {
-  var promise = new global.rsvp.Promise();
+  var promise = new global.rsvp.Promise
+  (
+    function (resolve, reject) 
+    {
+      tx.query
+      (
+        'update ' + 
+        'productimages ' + 
+        'set ' + 
+        'dateexpired=now(),' + 
+        'usersexpired_id=$1 ' + 
+        'where ' + 
+        'customers_id=$2 ' + 
+        'and ' + 
+        'id=$3 ' + 
+        'and ' + 
+        'dateexpired is null',
+        [
+          world.cn.userid,
+          world.cn.custid,
+          __.sanitiseAsBigInt(world.productimageid)
+        ],
+        function (err, result) 
+        {
+          if (!err) 
+          {
+            tx.query
+            (
+              'select ' + 
+              'p1.products_id productid,' + 
+              'p1.dateexpired,' + 
+              'u1.name ' + 
+              'from ' + 
+              'productimages p1 left join users u1 on (p1.usersexpired_id=u1.id) ' + 
+              'where ' + 
+              'p1.customers_id=$1 ' + 
+              'and ' + 
+              'p1.id=$2',
+              [
+                world.cn.custid,
+                __.sanitiseAsBigInt(world.productimageid)
+              ],
+              function (err, result) 
+              {
+                if (!err)
+                  resolve
+                  (
+                    { 
+                      productid: result.rows[0].productid, 
+                      dateexpired: global.moment(result.rows[0].dateexpired).format('YYYY-MM-DD HH:mm:ss'),
+                      userexpired: result.rows[0].name 
+                    }
+                  );
+                else
+                  reject(err);
+              }
+            );
+          }
+          else
+            reject(err);
+        }
+      );
+    }
+  );
   
   return promise;
 }
@@ -8639,8 +8702,31 @@ function ExpireProductCode(world)
                       if (!err)
                       {
                         done();
-                        world.spark.emit(world.eventname, {rc: global.errcode_none, msg: global.text_success, productid: result.productid, productcodeid: world.productcodeid, dateexpired: result.dateexpired, userexpired: result.userexpired, pdata: world.pdata});
-                        global.pr.sendToRoomExcept(global.custchannelprefix + world.cn.custid, 'productcodeexpired', {productid: result.productid, productcodeid: world.productcodeid, dateexpired: result.dateexpired, userexpired: result.userexpired}, world.spark.id);
+                        world.spark.emit
+                        (
+                          world.eventname,
+                          { 
+                            rc: global.errcode_none, 
+                            msg: global.text_success, 
+                            productid: result.productid, 
+                            productcodeid: world.productcodeid, 
+                            dateexpired: result.dateexpired, 
+                            userexpired: result.userexpired, 
+                            pdata: world.pdata
+                          }
+                        );
+                        global.pr.sendToRoomExcept
+                        (
+                          global.custchannelprefix + world.cn.custid, 
+                          'productcodeexpired', 
+                          {
+                            productid: result.productid, 
+                            productcodeid: world.productcodeid, 
+                            dateexpired: result.dateexpired, 
+                            userexpired: result.userexpired
+                          },
+                          world.spark.id
+                        );
                       }
                       else
                       {
@@ -8904,6 +8990,127 @@ function SaveProductImage(world)
 
 function ExpireProductImage(world) 
 {  
+  var msg = '[' + world.eventname + '] ';
+  //
+  global.pg.connect
+  (
+    global.cs,
+    function (err, client, done) 
+    {
+      if (!err) 
+      {
+        var tx = new global.pgtx(client);
+        tx.begin
+        (
+          function (err) 
+          {
+            if (!err) 
+            {
+              doExpireProductImage(tx, world).then
+              (
+                function (result) 
+                {
+                  tx.commit
+                  (
+                    function (err) 
+                    {
+                      if (!err) 
+                      {
+                        done();
+                        world.spark.emit
+                        (
+                          world.eventname, 
+                          { 
+                            rc: global.errcode_none, 
+                            msg: global.text_success, 
+                            productid: result.productid, 
+                            productimageid: world.productimageid, 
+                            dateexpired: result.dateexpired, 
+                            userexpired: result.userexpired, 
+                            pdata: world.pdata 
+                          }
+                        );
+                        global.pr.sendToRoomExcept
+                        (
+                          global.custchannelprefix + world.cn.custid, 
+                          'productimageexpired', 
+                          { 
+                            productid: result.productid, 
+                            productimageid: world.productimageid, 
+                            dateexpired: result.dateexpired, 
+                            userexpired: result.userexpired 
+                          }, 
+                          world.spark.id
+                        );
+                      } 
+                      else 
+                      {
+                        tx.rollback
+                        (
+                          function (ignore) 
+                          {
+                            done();
+                            msg += global.text_tx + ' ' + err.message;
+                            global.log.error({ expireproductimage: true }, msg);
+                            world.spark.emit(global.eventerror, { rc: global.errcode_dberr, msg: msg, pdata: world.pdata });
+                          }
+                        );
+                      }
+                    }
+                  );
+                }
+              ).then
+              (
+                null,
+                function (err) 
+                {
+                  tx.rollback
+                  (
+                    function (ignore) 
+                    {
+                      done();
+
+                      msg += global.text_generalexception + ' ' + err.message;
+                      global.log.error({ expireproductimage: true }, msg);
+                      world.spark.emit
+                      (
+                        global.eventerror, 
+                        { 
+                          rc: global.errcode_fatal, 
+                          msg: msg, 
+                          pdata: world.pdata 
+                        }
+                      );
+                    }
+                  );
+                }
+              );
+            }
+            else 
+            {
+              done();
+              msg += global.text_notxstart + ' ' + err.message;
+              global.log.error({ expireproductimage: true }, msg);
+              world.spark.emit
+              (
+                global.eventerror, 
+                { 
+                  rc: global.errcode_dberr, 
+                  msg: msg, 
+                  pdata: world.pdata 
+                }
+              );
+            }
+          }
+        );
+      } 
+      else 
+      {
+        global.log.error({ expireproductimage: true }, global.text_nodbconnection);
+        world.spark.emit(global.eventerror, { rc: global.errcode_dbunavail, msg: global.text_nodbconnection, pdata: world.pdata });
+      }
+    }
+  );
 }
 
 function GetProductThumbnail(world) 
