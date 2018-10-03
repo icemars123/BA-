@@ -8918,27 +8918,39 @@ function GetProductThumbnail(world)
         client.query
           (
           'select ' +
-          'oa1.id ' +
+          'p1.id ' +
           'from ' +
-          'orderattachments oa1 ' +
+          'productimages p1 ' +
           'where ' +
-          'oa1.customers_id=$1 ' +
+          'p1.customers_id=$1 ' +
           'and ' +
-          'oa1.orders_id=$2 ' +
+          'p1.products_id=$2 ' +
           'and ' +
-          'oa1.isthumbnail=1',
+          'p1.isthumbnail=1',
           [
             world.cn.custid,
-            __.sanitiseAsBigInt(world.orderid)
+            __.sanitiseAsBigInt(world.productid)
           ],
-          function (err, result) {
+          function (err, result) 
+          {
             done();
 
             if (!err)
-              world.spark.emit(world.eventname, { rc: global.errcode_none, msg: global.text_success, fguid: world.fguid, orderattachmentid: result.rows[0].id, pdata: world.pdata });
-            else {
+              world.spark.emit
+              (
+                world.eventname, 
+                { 
+                  rc: global.errcode_none, 
+                  msg: global.text_success, 
+                  fguid: world.fguid, 
+                  productimageid: result.rows[0].id, 
+                  pdata: world.pdata 
+                }
+              );
+            else 
+            {
               msg += global.text_generalexception + ' ' + err.message;
-              global.log.error({ getorderthumbnail: true }, msg);
+              global.log.error({ getproductthumbnail: true }, msg);
               world.spark.emit(global.eventerror, { rc: global.errcode_fatal, msg: msg, pdata: world.pdata });
             }
           }
@@ -8946,7 +8958,7 @@ function GetProductThumbnail(world)
       }
       else 
       {
-        global.log.error({ getorderthumbnail: true }, global.text_nodbconnection);
+        global.log.error({ getproductthumbnail: true }, global.text_nodbconnection);
         world.spark.emit(global.eventerror, { rc: global.errcode_dbunavail, msg: global.text_nodbconnection, pdata: world.pdata });
       }
     }

@@ -359,6 +359,7 @@ var cache_userpermissions = [];
 var cache_orderproducts = [];
 var cache_printtemplates = [];
 var cache_buildtemplates = [];
+var cache_productimages = [];
 var cache_config = {};
 // Jobsheet detail types
 var itype_js_printer = 1;

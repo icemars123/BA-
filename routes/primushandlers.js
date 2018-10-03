@@ -1403,10 +1403,43 @@ function doPrimus() {
     doAddPrimusListener('getprice');
 
     // Product image requests
-    doAddPrimusListener('listproductimages');
+    // doAddPrimusListener('listproductimages');
     doAddPrimusListener('saveproductimage');
     doAddPrimusListener('expireproductimage');
     doAddPrimusListener('getproductthumbnail');
+    doAddPrimusListener
+    (
+      'listproductimages',
+      function (eventname, data) 
+      {
+        if (!_.isUN(data.rs)) 
+        {
+          cache_productimages = [];
+
+          data.rs.forEach
+          (
+            function (p) 
+            {
+              cache_productimages.push
+              (
+                {
+                  id: doNiceId(p.id),
+                  name: doNiceString(p.name),
+                  description: doNiceString(p.description),
+                  // type: p.type,
+                  // size: p.size,
+                  // thumbnail: p.thumbnail,
+                  // // image: p.image
+                  // modified: p.modified,
+                  by: doNiceModifiedBy(p.datemodified, p.usermodified, p.usercreated)
+                }
+              );
+            }
+          );
+          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
+        }
+      }
+    );
 
     // Build template requests
     doAddPrimusListener('newbuildtemplate');
@@ -1866,17 +1899,20 @@ function doPrimus() {
     doAddPrimusListener('expireorderdetail');
 
     doAddPrimusListener
-      (
+    (
       'listorderdetails',
-      function (eventname, data) {
-        if (!_.isUN(data.rs)) {
+      function (eventname, data) 
+      {
+        if (!_.isUN(data.rs)) 
+        {
           cache_orderproducts = [];
 
           data.rs.forEach
-            (
-            function (p) {
+          (
+            function (p) 
+            {
               cache_orderproducts.push
-                (
+              (
                 {
                   id: doNiceId(p.id),
                   productid: doNiceId(p.productid),
@@ -1890,14 +1926,14 @@ function doPrimus() {
                   date: doNiceDateModifiedOrCreated(p.datemodified, p.datecreated),
                   by: doNiceModifiedBy(p.datemodified, p.usermodified, p.usercreated)
                 }
-                );
+              );
             }
-            );
+          );
 
           $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
         }
       }
-      );
+    );
 
     // Gov requests
     doAddPrimusListener('abnlookup');
