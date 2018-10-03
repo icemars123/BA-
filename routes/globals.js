@@ -1610,6 +1610,7 @@ function doRefreshAll()
   doServerMessage('listexchangerates', {type: 'refresh'});
   doServerMessage('listprinttemplates', {type: 'refresh'});
   doServerMessage('loadconfig', {type: 'refresh'});
+  // doServerMessage('listproductimages', { type: 'refresh' });
   
   //primus.emit('listbuildtemplateroots', {fguid: fguid, uuid: uuid, session: session, pdata: {type: 'refresh'}});
 

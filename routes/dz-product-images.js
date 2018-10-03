@@ -14,7 +14,7 @@ function doDZProductImages()
             uploadMultiple: false,
             parallelUploads: 1,
             addRemoveLinks: true,
-            maxFilesize: 10,
+            maxFilesize: 1000,
             dictDefaultMessage: 'Drop files here to upload - description text will be added',
             init: function () 
             {
@@ -51,10 +51,11 @@ function doDZProductImages()
             },
             accept: function (file, done) 
             {
-                if (myperms.cancreateproducts)
-                    done();
-                else
-                    done('You don\'t have permission to add attachments');
+                done()
+                // if (myperms.cancreateproducts)
+                //     done();
+                // else
+                //     done('You don\'t have permission to add images');
             }
         }
     );

@@ -1410,35 +1410,35 @@ function doPrimus() {
     doAddPrimusListener
     (
       'listproductimages',
-      function (eventname, data) 
-      {
-        if (!_.isUN(data.rs)) 
-        {
-          cache_productimages = [];
+      // function (eventname, data) 
+      // {
+      //   if (!_.isUN(data.rs)) 
+      //   {
+      //     cache_productimages = [];
 
-          data.rs.forEach
-          (
-            function (p) 
-            {
-              cache_productimages.push
-              (
-                {
-                  id: doNiceId(p.id),
-                  name: doNiceString(p.name),
-                  description: doNiceString(p.description),
-                  // type: p.type,
-                  // size: p.size,
-                  // thumbnail: p.thumbnail,
-                  // // image: p.image
-                  // modified: p.modified,
-                  by: doNiceModifiedBy(p.datemodified, p.usermodified, p.usercreated)
-                }
-              );
-            }
-          );
-          $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
-        }
-      }
+      //     data.rs.forEach
+      //     (
+      //       function (p) 
+      //       {
+      //         cache_productimages.push
+      //         (
+      //           {
+      //             id: doNiceId(p.id),
+      //             name: doNiceString(p.name),
+      //             description: doNiceString(p.description),
+      //             // type: p.type,
+      //             // size: p.size,
+      //             // thumbnail: p.thumbnail,
+      //             // // image: p.image
+      //             // modified: p.modified,
+      //             by: doNiceModifiedBy(p.datemodified, p.usermodified, p.usercreated)
+      //           }
+      //         );
+      //       }
+      //     );
+      //     $('#divEvents').trigger(eventname, { data: data, pdata: $.extend(data.pdata, {}) });
+      //   }
+      // }
     );
 
     // Build template requests
@@ -1907,6 +1907,7 @@ function doPrimus() {
         {
           cache_orderproducts = [];
 
+          // console.log('gavin');
           data.rs.forEach
           (
             function (p) 
@@ -1927,6 +1928,7 @@ function doPrimus() {
                   by: doNiceModifiedBy(p.datemodified, p.usermodified, p.usercreated)
                 }
               );
+              console.log('id: ' + cache_orderproducts.length);
             }
           );
 

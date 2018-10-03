@@ -193,6 +193,7 @@ global.text_noprinttemplate = "Unable to find system print template...";
 global.text_nodeliverydockettemplate = "Unable to find a delivery docket template...";
 global.text_unablesavepermissiontemplate = "Unable to save permission template...";
 global.text_unableexpirepermissiontemplate = "Unable to expire permission template...";
+global.text_unablefetchproductImage = "Unable to fetch product images...";
 
 
 //global.text_newcode = 'NEWCODE';
@@ -988,6 +989,17 @@ global.doAttachmentImageURL = function(orderid, attachmentid, attachmentname, mi
 
   return image;
 };
+
+global.doProductImageURL = function (productid, imageid, imagename, mimetype) 
+{
+  var image = '';
+
+  if (global.isMimeTypeImage(mimetype))
+    image = global.config.folders.productimages + imageid + '_' + productid + '_' + imagename;
+
+  return image;
+};
+
 
 global.doJobSheetImageURL = function(jobsheetid, imagename, mimetype)
 {
@@ -2444,7 +2456,7 @@ function main()
 
   app.get
   (
-    './throwproductimage',
+    '/throwproductimage',
     function (req, res) 
     {
       throwproductimages.throwProductImageGet(req, res); 

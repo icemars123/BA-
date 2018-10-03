@@ -3352,9 +3352,9 @@ function existingProductImage(args, callback)
                     client.query
                     (
                       'select ' +
-                      'o1.products_id productid,' +
-                      'o1.name,' +
-                      'o1.size ' +
+                      'p1.products_id productid,' +
+                      'p1.name,' +
+                      'p1.size ' +
                       'from ' +
                       'productimages p1 ' +
                       'where ' +
@@ -3394,11 +3394,13 @@ function existingProductImage(args, callback)
                   }
                 }
               );
-            } else 
+            } 
+            else 
               callback(err, null);
           }
         );
-      } else 
+      } 
+      else 
         callback(err, null);
     }
   );

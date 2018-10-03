@@ -25,7 +25,7 @@ exports.dropProductImagePost = function (req, res)
                     {
                         if (!err) 
                         {
-                            var filename = global.path.join(__dirname, global.doAttachmentImageURL(req.body.productid, id, req.files.file.originalFilename, req.files.file.type));
+                            var filename = global.path.join(__dirname, global.doProductImageURL(req.body.productid, id, req.files.file.originalFilename, req.files.file.type));
                             //
                             global.fs.rename
                             (

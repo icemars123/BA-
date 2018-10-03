@@ -874,9 +874,10 @@ function doDlgProductNew(productcategoryid, productid)
             idField: 'id',
             fitColumns: true,
             singleSelect: true,
-            rownumbers: false,
+            rownumbers: true,
             striped: true,
             toolbar: '#tbProductImages',
+            showFooter: true,
             columns:
               [
                 [
@@ -1002,6 +1003,8 @@ function doDlgProductNew(productcategoryid, productid)
               var attrib4 = $('#fldNewProductAttrib4').textbox('getValue');
               var attrib5 = $('#fldNewProductAttrib5').textbox('getValue');
 
+              var data = $('#divNewProductImagesG').datagrid('getData');
+
               if (isnew)
               {
                 doServerDataMessage
@@ -1052,7 +1055,9 @@ function doDlgProductNew(productcategoryid, productid)
                     attrib2: attrib2,
                     attrib3: attrib3,
                     attrib4: attrib4,
-                    attrib5: attrib5
+                    attrib5: attrib5,
+
+                    // images: data.rows
                   },
                   {type: 'refresh'}
                 );
