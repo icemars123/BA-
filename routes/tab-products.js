@@ -277,9 +277,7 @@ function doProductsTabWidgets()
       sortOrder: 'asc',
       remoteSort: false,
       multiSort: true,
-      // pagination: true,
-      pageSize: 100,
-      // view: scrollview,
+      pageSize: 80,
       autoRowHeight: false,
       loader: function(param, success, error)
       {
