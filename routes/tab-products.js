@@ -265,6 +265,7 @@ function doProductsTabWidgets()
   $('#divProductsG').datagrid
   (
     {
+      view: scrollview,
       idField: 'id',
       fitColumns: false,
       singleSelect: true,
@@ -276,6 +277,10 @@ function doProductsTabWidgets()
       sortOrder: 'asc',
       remoteSort: false,
       multiSort: true,
+      // pagination: true,
+      pageSize: 100,
+      // view: scrollview,
+      autoRowHeight: false,
       loader: function(param, success, error)
       {
         success({total: cache_productsbycategory.length, rows: cache_productsbycategory});
