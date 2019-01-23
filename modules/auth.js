@@ -589,17 +589,17 @@ function LoginUser(spark, eventname, fguid, uid, pwd, pdata)
           {
             if (!err)
             {
-              doGetUserAuthDetails(tx, uid).then
+              doGetUserAuthDetails(tx, uid).then      //select details of the user
               (
                 function(user)
                 {
-                  return doAuthPassword(tx, user, pwd);
+                  return doAuthPassword(tx, user, pwd);   // do authentication for the password of the user
                 }
               ).then
               (
                 function(user)
                 {
-                  return doLogin(tx, user, spark.remote.address);
+                  return doLogin(tx, user, spark.remote.address);   //do log in
                 }
               ).then
               (
