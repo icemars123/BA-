@@ -1139,7 +1139,8 @@ global.userFromUserid = function(userid)
             if (keycount > 0)
             {
               userid = __.makeBigInt(userid);
-              // The some() method tests whether at least one element in the array passes the test implemented by the provided function. It returns a Boolean value. 
+              // The some() method tests whether at least one element in the array passes the test implemented by the provided function. 
+              // It returns a Boolean value. 
               keys.some
               (
                 function(k)
